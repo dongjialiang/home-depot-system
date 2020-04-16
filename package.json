@@ -2,13 +2,14 @@
   "name": "home-depot-system",
   "version": "1.0.0",
   "description": "The home depot system.",
-  "main": "index.js",
+  "main": "server.js",
   "scripts": {
     "test": "mocha --exit",
     "cov": "nyc mocha --exit",
     "wrap": "nodemon server --ignore test/",
     "db-start": "mongod",
-    "lint": "eslint \"**/*.js\""
+    "lint": "eslint \"**/*.js\"",
+    "start": "node server"
   },
   "keywords": [],
   "author": "",

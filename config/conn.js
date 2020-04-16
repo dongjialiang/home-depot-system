@@ -4,15 +4,15 @@
 
 // 引入依赖
 const mongoose = require('mongoose');
-const redis = require('redis');
+// const redis = require('redis'); // 使用redis客户端*2
 const { RateLimiterMongo } = require('rate-limiter-flexible');
 // 引入配置
 require('dotenv').config({ path: `${process.cwd()}/config/.env` });
 // 设置连接地址
 const mongoDBConnUrl = process.env.MONGODB_CONNURL;
 const mongoDBTestConnUrl = process.env.MONGODB_TESTCONNURL;
-const REDIS_POST = process.env.PORT || 6379;
-// const redisClient = redis.createClient(REDIS_POST);
+// const REDIS_POST = process.env.PORT || 6379; // *2
+// const redisClient = redis.createClient(REDIS_POST); // *2
 
 const mongoDBConn = (URL) => {
     mongoose.set('useCreateIndex', true);
