@@ -4,10 +4,10 @@
 // 引入依赖
 const request = require('supertest');
 const { expect } = require('chai');
-// const app = require('../server'); // 直接使用服务器测试
-const app = 'http://localhost:7326'; // 在服务器开启的情况下进行测试*1
-const { mongoDBConn, mongoDBConnUrl } = require('../config/conn'); // *1
-const { after, before, beforeEach, describe, it } = require('mocha');
+const app = require('../server'); // 直接使用服务器测试
+// const app = 'http://localhost:7326'; // 在服务器开启的情况下进行测试*1
+// const { mongoDBConn, mongoDBConnUrl } = require('../config/conn'); // *1
+const { before, beforeEach, describe, it } = require('mocha');
 
 const UserModel = require('../models/User');
 // 引入配置
@@ -16,7 +16,7 @@ require('dotenv').config({ path: `${process.cwd()}/config/.env` });
 let jwtToken;
 let resetPasswordToken;
 before((done) => {
-    mongoDBConn(mongoDBConnUrl); // *1
+    // mongoDBConn(mongoDBConnUrl); // *1
     UserModel.deleteOne({
         email: 'ljd9726@163.com',
     }).then((err, user) => {
