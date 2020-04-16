@@ -1,0 +1,26 @@
+version: '3.4'
+
+services:
+  mongodb:
+    image: mongo
+    restart: always
+    # volumes:
+    #   - 
+    networks:
+      - webapp-network
+  home-depot-system:
+    image: home-depot-system
+    depends_on:
+      - mongodb
+    # build: .
+    # environment:
+    #   NODE_ENV: development
+    ports:
+      - 7326
+    networks:
+      - webapp-network
+      # - 9229:9229
+    # command: node --inspect=0.0.0.0:9229 index.js
+  networks:
+    webapp-network:
+      driver: bridge
