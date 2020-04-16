@@ -8,7 +8,7 @@ const app = express();
 
 // 引入配置
 require('./config/cors')(app);
-const rateLimiterMiddleware = require('./config/conn');
+const { rateLimiterMiddleware } = require('./config/conn');
 require('./config/auth');
 
 // 使用中间件
@@ -31,5 +31,5 @@ app.listen(PORT, err => {
     if (err) { throw err; }
     console.log(`Server is running on ${PORT}`);
 });
-// 测试的时候也可以开放app
-// module.exports = app;
+// 测试的时候可以直接开放服务器给测试框架使用
+module.exports = app;
