@@ -14,18 +14,15 @@ const mongoDBTestConnUrl = process.env.MONGODB_TESTCONNURL;
 // const REDIS_POST = process.env.PORT || 6379; // *2
 // const redisClient = redis.createClient(REDIS_POST); // *2
 
-const mongoDBConn = (URL) => {
-    mongoose.set('useCreateIndex', true);
-    mongoose.connect(URL, {
-        useNewUrlParser: true,    // 启用新的字符串连接解释器
-        useUnifiedTopology: true, // 启用新的拓扑引擎,删除几个旧的连接选项
-    })
-    .then(() => { /* console.log('MongoDB connection succeeded'); */ });
-    mongoose.connection.on('error', error => console.error(error));
-    mongoose.Promise = global.Promise;
-    return mongoose.connection;
-}
-const mongoConn = mongoDBConn(mongoDBConnUrl);
+mongoose.set('useCreateIndex', true);
+mongoose.connect(mongoDBTestConnUrl, {
+    useNewUrlParser: true,    // 启用新的字符串连接解释器
+    useUnifiedTopology: true, // 启用新的拓扑引擎,删除几个旧的连接选项
+})
+.then(() => { /* console.log('MongoDB connection succeeded'); */ });
+mongoose.connection.on('error', error => console.error(error));
+mongoose.Promise = global.Promise;
+const mongoConn = mongoose.connection;
 
 const opts = {
     storeClient: mongoConn,
@@ -42,4 +39,4 @@ const rateLimiterMiddleware = (req, res, next) => {
             res.status(429).json({ message: 'Too Many Requests.' });
         });
 };
-module.exports = { rateLimiterMiddleware, mongoDBConn, mongoDBConnUrl, mongoDBTestConnUrl };
+module.exports = { rateLimiterMiddleware, mongoDBConnUrl, mongoDBTestConnUrl };

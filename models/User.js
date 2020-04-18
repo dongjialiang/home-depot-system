@@ -20,7 +20,10 @@ const userSchema = new Schema({
     },
     emailToken: String,
     emailExpires: Date,
-}, { timestamps: true });
+}, {
+    timestamps: true,
+    collection: 'user',
+});
 // 密码加密
 userSchema.pre('save', async function(next) {
     /*
