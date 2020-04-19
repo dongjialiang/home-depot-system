@@ -1,7 +1,6 @@
-/*
+/**
  * 连接数据库的文件
  */
-
 // 引入依赖
 const mongoose = require('mongoose');
 // const redis = require('redis'); // 使用redis客户端*2

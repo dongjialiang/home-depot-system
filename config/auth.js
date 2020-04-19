@@ -1,4 +1,4 @@
-/*
+/**
  * 用户验证的文件
  */
 const passport = require('passport');

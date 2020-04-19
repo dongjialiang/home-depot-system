@@ -42,7 +42,12 @@ const resetEmailToken = (user) => {
 }
 
 const router = express.Router();
-// 注册
+/**
+ * POST /signup
+ * 注册
+ * @param email    [邮箱地址]
+ * @param password [用户密码]
+ */
 router.post('/signup',
     passport.authenticate('signup', { session: false }),
     async (req, res) => {
@@ -60,7 +65,12 @@ router.post('/signup',
         sendVerifyEmail(req.user, EXPIRES_TIME.ONEDAY, '绑定邮箱', '绑定邮箱的验证码');
     }
 );
-// 登录
+/**
+ * POST /login
+ * 登录
+ * @param email    [邮箱地址]
+ * @param password [用户密码]
+ */
 router.post('/login', async (req, res, next) => {
     passport.authenticate('login', async (err, user, info) => {
         try {
@@ -78,7 +88,11 @@ router.post('/login', async (req, res, next) => {
         }
     })(req, res, next);
 });
-// 发送带激活邮箱验证码的邮件
+/**
+ * POST /verifyemail
+ * 发送带激活邮箱验证码的邮件
+ * @param email [邮箱地址]
+ */
 router.post('/verifyemail', async (req, res) => {
     const email = req.body.email;
     UserModel
@@ -96,7 +110,12 @@ router.post('/verifyemail', async (req, res) => {
             }
         });
 });
-// 验证绑定邮箱的验证码是否正确
+/**
+ * POST /verifyemailtoken
+ * 验证绑定邮箱的验证码是否正确
+ * @param email      [邮箱地址]
+ * @param emailToken [绑定邮箱的验证码]
+ */
 router.post('/verifyemailtoken', async (req, res, next) => {
     if (!validator.isEmail(req.body.email)) {
         return res.status(422).json({ message: 'Please confirm your email address.' });
@@ -121,7 +140,11 @@ router.post('/verifyemailtoken', async (req, res, next) => {
             }
         });
 });
-// 发送重置密码需要的验证码的邮件
+/**
+ * POST /resetpassword
+ * 发送重置密码需要的验证码的邮件
+ * @param email [邮箱地址]
+ */
 router.post('/resetpassword', async (req, res) => {
     const email = req.body.email;
     UserModel
@@ -139,7 +162,13 @@ router.post('/resetpassword', async (req, res) => {
             }
         });
 });
-// 重置密码
+/**
+ * POST /resetpasswordtoken
+ * 重置密码
+ * @param email      [邮箱地址]
+ * @param password   [用户密码]
+ * @param emailToken [重置密码的邮箱验证码]
+ */
 router.post('/resetpasswordtoken', async (req, res, next) => {
     if (!validator.isEmail(req.body.email)) {
         return res.status(422).json({ message: 'Please confirm your email address.' });

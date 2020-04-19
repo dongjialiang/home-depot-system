@@ -1,6 +1,8 @@
-
+/**
+ * 用户模型文件
+ */
 // 引入依赖
-const mongoose = require('mongoose')
+const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
 const Schema = mongoose.Schema;
 
@@ -26,9 +28,9 @@ const userSchema = new Schema({
 });
 // 密码加密
 userSchema.pre('save', async function(next) {
-    /*
-     *  这里不能使用箭头函数,详情请看
-     *  https://stackoverflow.com/questions/45015613/error-data-and-salt-arguments-required/45015918
+    /**
+     * 这里不能使用箭头函数,详情请看
+     * https://stackoverflow.com/questions/45015613/error-data-and-salt-arguments-required/45015918
      */
     const user = this;
     if (!user.isModified('password')) { return next(); }
@@ -38,8 +40,8 @@ userSchema.pre('save', async function(next) {
 });
 // 密码解密
 const comparePassword = async function(candidatePassword) {
-    /*
-     *  这里也不能使用箭头函数
+    /**
+     * 这里也不能使用箭头函数
      */
     const user = this;
     const compare = await bcrypt.compare(candidatePassword, user.password);
