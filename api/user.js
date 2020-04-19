@@ -136,7 +136,7 @@ router.post('/verifyemailtoken', async (req, res, next) => {
             } else {
                 resetEmailToken(user);
                 user.save();
-                res.json({ message: 'Verify email Succeessed!' });
+                res.json({ message: 'Verify email Successful!' });
             }
         });
 });
@@ -192,7 +192,7 @@ router.post('/resetpasswordtoken', async (req, res, next) => {
                 resetEmailToken(user);
                 user.password = req.body.password;
                 user.save();
-                res.json({ message: 'Password reset Succeessed!' });
+                res.json({ message: 'Password reset Successful!' });
             }
         });
 });

@@ -1,10 +1,14 @@
 // 引入依赖
 const express = require('express');
 const bodyParser = require('body-parser');
-const passport = require('passport');
-const logger = require('morgan');
 const helmet = require('helmet');
+const logger = require('morgan');
+const passport = require('passport');
+const path = require('path');
 const app = express();
+const multer = require('multer');
+
+const upload = multer({ dest: path.join(__dirname, 'uploads') });
 
 // 引入配置
 require('./config/cors')(app);
@@ -22,8 +26,12 @@ app.use(rateLimiterMiddleware);
 // 配置路由
 const userRoute = require('./api/user');
 const profileRoute = require('./api/profile');
+const { uploadAvatar, uploadImages } = require('./api/upload');
+app.use('/images', express.static(path.join(__dirname, 'uploads'), { maxAge: 31557600000 }));
 app.use('/api/user', userRoute);
 app.use('/api/secure', passport.authenticate('jwt', { session: false }), profileRoute);
+app.post('/api/avatar', upload.single('avatar'), uploadAvatar);
+app.post('/api/images', upload.array('images', 20), uploadImages);
 
 // 服务器设置
 const PORT = process.env.PORT || 7326;

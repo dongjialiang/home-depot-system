@@ -181,7 +181,7 @@ describe('POST /verifyemailtoken', () => {
                 done();
             });
     });
-    it('2. should "Verify email Succeessed!"', (done) => {
+    it('2. should "Verify email Successful!"', (done) => {
         request(app)
         .post('/api/user/verifyemailtoken')
         .send({
@@ -191,7 +191,7 @@ describe('POST /verifyemailtoken', () => {
         .expect(200)
         .end((err, res) => {
             if (err) { return done(err); }
-            expect(res.body.message).equal('Verify email Succeessed!');
+            expect(res.body.message).equal('Verify email Successful!');
             done();
         });
     });
@@ -293,7 +293,7 @@ describe('POST /resetpasswordtoken', () => {
                 done();
             });
     });
-    it('4. should "Password reset Succeessed!"', (done) => {
+    it('4. should "Password reset Successful!"', (done) => {
         request(app)
             .post('/api/user/resetpasswordtoken')
             .send({
@@ -304,7 +304,7 @@ describe('POST /resetpasswordtoken', () => {
             .expect(200)
             .end((err, res) => {
                 if (err) { return done(err); }
-                expect(res.body.message).equal('Password reset Succeessed!');
+                expect(res.body.message).equal('Password reset Successful!');
                 done();
             });
     });

@@ -29,8 +29,7 @@ const userSchema = new Schema({
 // 密码加密
 userSchema.pre('save', async function(next) {
     /**
-     * 这里不能使用箭头函数,详情请看
-     * https://stackoverflow.com/questions/45015613/error-data-and-salt-arguments-required/45015918
+     * mongoose使用getter/setter访问文档，此功能不适用于箭头函数
      */
     const user = this;
     if (!user.isModified('password')) { return next(); }
