@@ -1,0 +1,28 @@
+@url = http://localhost:7326
+
+@json = Content-Type: application/json
+
+### 注册
+POST  {{url}}/api/user/signup
+{{json}}
+
+{
+    "email": "ljd9726@163.com",
+    "password": "87654321"
+}
+
+### 登录
+POST  {{url}}/api/user/login
+{{json}}
+
+{
+    "email": "ljd9726@163.com",
+    "password": "87654321"
+}
+
+### 个人信息
+GET {{url}}/api/secure/profile
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7Il9pZCI6IjVlOWM1ODgxZTgyMmQ3MjNmYzllOWMwYyIsImVtYWlsIjoibGpkOTcyNkAxNjMuY29tIn0sImlhdCI6MTU4ODQ5NTc0MCwiZXhwIjoxNTg5NzA1MzQwfQ.v6LFezJlWAHT1a2g0RpfKdK9CAzD353mLByMOzuW2ak
+
+### 获取产品
+GET {{url}}/api/product/70171927

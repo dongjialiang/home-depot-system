@@ -1,3 +1,6 @@
+/**
+ * 用户接口文件
+ */
 // 引入依赖
 const express = require('express');
 const passport = require('passport');
@@ -6,6 +9,8 @@ const { promisify } = require('util');
 const crypto = require('crypto');
 const validator = require('validator');
 const UserModel = require('../models/User');
+// 引入配置
+require('dotenv').config('../config/.env');
 
 const randomBytesAsync = promisify(crypto.randomBytes);
 
@@ -80,7 +85,7 @@ router.post('/login', async (req, res, next) => {
             req.login(user, { session: false }, async (error) => {
                 if (error) { return next(error); }
                 const body = { _id: user._id, email: user.email };
-                const token = jwt.sign({ user: body }, 'top_secret', { expiresIn: '14d' });
+                const token = jwt.sign({ user: body }, process.env.TOP_SECRET, { expiresIn: '14d' });
                 return res.json({ 'message': info.message, token });
             });
         } catch (error) {

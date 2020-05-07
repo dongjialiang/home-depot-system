@@ -3,10 +3,11 @@
  */
 const passport = require('passport');
 const localStrategy = require('passport-local').Strategy;
-const JWTstrategy = require('passport-jwt').Strategy;
-const ExtractJWT = require('passport-jwt').ExtractJwt;
 const validator = require('validator');
 const UserModel = require('../models/User');
+const jwt = require('jsonwebtoken');
+// 引入配置
+require('dotenv').config('../config/.env');
 
 // 注册验证
 passport.use('signup', new localStrategy({
@@ -52,13 +53,11 @@ passport.use('login', new localStrategy({
     }
 }));
 
-passport.use(new JWTstrategy({
-    secretOrKey: 'top_secret',
-    jwtFromRequest: ExtractJWT.fromAuthHeaderAsBearerToken(),
-}, async (token, done) => {
-    try {
-        return done(null, token.user);
-    } catch (error) {
-        done(error);
-    }
-}));
+const authenticate = async (req, res, next) => {
+    const raw = String(req.headers.authorization).split(' ').pop();
+    const { user } = jwt.verify(raw, process.env.TOP_SECRET);
+    req.user = await user;
+    next();
+};
+
+module.exports = { authenticate };

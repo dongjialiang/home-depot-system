@@ -3,12 +3,12 @@
  */
 // 引入依赖
 const fs = require('fs');
-const uploadAvatar = (req, res, next) => {
+const uploadAvatar = (req, res) => {
     let file = req.file;
     fs.renameSync(`./uploads/${file.filename}`, `./uploads/${file.originalname}`);
     res.json(`${file.originalname} upload Successful`);
 };
-const uploadImages = (req, res, next) => {
+const uploadImages = (req, res) => {
     let files = req.files;
     const fileInfos = [];
     for (const file of files) {

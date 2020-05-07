@@ -7,11 +7,11 @@ const passport = require('passport');
 const path = require('path');
 const app = express();
 const multer = require('multer');
-
+// 设置上传文件存放的文件夹
 const upload = multer({ dest: path.join(__dirname, 'uploads') });
-
 // 引入配置
 require('./config/cors')(app);
+const { authenticate } = require('./config/auth');
 const { rateLimiterMiddleware } = require('./config/conn');
 require('./config/auth');
 
@@ -25,11 +25,13 @@ app.use(rateLimiterMiddleware);
 
 // 配置路由
 const userRoute = require('./api/user');
+const ProductRoute = require('./api/product');
 const profileRoute = require('./api/profile');
 const { uploadAvatar, uploadImages } = require('./api/upload');
 app.use('/images', express.static(path.join(__dirname, 'uploads'), { maxAge: 31557600000 }));
 app.use('/api/user', userRoute);
-app.use('/api/secure', passport.authenticate('jwt', { session: false }), profileRoute);
+app.use('/api/secure', authenticate, profileRoute);
+app.use('/api', ProductRoute);
 app.post('/api/avatar', upload.single('avatar'), uploadAvatar);
 app.post('/api/images', upload.array('images', 20), uploadImages);
 

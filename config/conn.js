@@ -14,7 +14,7 @@ const mongoDBTestConnUrl = process.env.MONGODB_TESTCONNURL;
 // const redisClient = redis.createClient(REDIS_POST); // *2
 
 mongoose.set('useCreateIndex', true);
-mongoose.connect(mongoDBTestConnUrl, {
+mongoose.connect(mongoDBConnUrl, {
     useNewUrlParser: true,    // 启用新的字符串连接解释器
     useUnifiedTopology: true, // 启用新的拓扑引擎,删除几个旧的连接选项
 })

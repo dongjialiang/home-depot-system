@@ -10,8 +10,6 @@ const UserModel = require('../models/User');
 // 引入配置
 require('dotenv').config({ path: `${process.cwd()}/config/.env` });
 
-let mongoDBConn;
-
 before((done) => {
     mongoose.set('useCreateIndex', true);
     mongoose.connect(mongoDBTestConnUrl, {
@@ -21,7 +19,6 @@ before((done) => {
     .then(() => { /* console.log('MongoDB connection succeeded'); */ });
     mongoose.connection.on('error', error => console.error(error));
     mongoose.Promise = global.Promise;
-    mongoDBConn = mongoose.connection;
     done();
 });
 
@@ -73,6 +70,6 @@ describe('User Model', () => {
     });
 });
 after((done) => {
-    mongoDBConn.close();
+    UserModel.db.dropCollection('user');
     done();
 });

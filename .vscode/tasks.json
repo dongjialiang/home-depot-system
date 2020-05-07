@@ -3,13 +3,6 @@
 	"tasks": [
 		{
 			"type": "npm",
-			"script": "db-start",
-			"problemMatcher": [],
-			"label": "npm: db-start",
-			"detail": "start mongod"
-		},
-		{
-			"type": "npm",
 			"script": "wrap",
 			"problemMatcher": [],
 			"label": "npm: wrap",
