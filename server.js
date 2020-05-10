@@ -12,7 +12,7 @@ const upload = multer({ dest: path.join(__dirname, 'uploads') });
 // 引入配置
 require('./config/cors')(app);
 const { authenticate } = require('./config/auth');
-const { rateLimiterMiddleware } = require('./config/conn');
+// const { rateLimiterMiddleware } = require('./config/conn');
 require('./config/auth');
 
 // 使用中间件
@@ -21,7 +21,7 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(passport.initialize()); // 初始化passport
 app.use(logger('dev'));
 app.use(helmet());
-app.use(rateLimiterMiddleware);
+// app.use(rateLimiterMiddleware);
 
 // 配置路由
 const userRoute = require('./api/user');

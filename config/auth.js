@@ -35,17 +35,14 @@ passport.use('login', new localStrategy({
     usernameField: 'email',
 }, async (email, password, done) => {
     try {
-        if (!validator.isLength(password, { min: 8 })) {
-            return done(null, false, { message: 'Password must be at least 8 characters long.' });
-        }
-        const invalidMessage = 'Invalid email or password.';
+        // const invalidMessage = 'Invalid email or password.';
         const user = await UserModel.findOne({ email });
         if (!user) {
-            return done(null, false, { message: invalidMessage });
+            return done(null, false, { message: 'Invalid email.' });
         }
         const isValidPassword = await user.comparePassword(password);
         if (!isValidPassword) {
-            return done(null, false, { message: invalidMessage });
+            return done(null, false, { message: 'Invalid password.' });
         }
         return done(null, user, { message: 'Logged in Successfully.' });
     } catch (error) {

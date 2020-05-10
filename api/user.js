@@ -9,16 +9,35 @@ const { promisify } = require('util');
 const crypto = require('crypto');
 const validator = require('validator');
 const UserModel = require('../models/User');
+const { RateLimiterRedis } = require('rate-limiter-flexible');
+const { redisClient } = require('../config/conn');
 // 引入配置
 require('dotenv').config('../config/.env');
 
 const randomBytesAsync = promisify(crypto.randomBytes);
 
-const EXPIRES_TIME = {
-    ONEDAY: Date.now() + 24 * 3600 * 1000,
-    FIVEMINUTES: Date.now() + 300 * 1000,
+const EXPIRES_TIME = { // 过期时间
+    ONEDAY: Date.now() + 24 * 3600 * 1000, // 一天
+    FIVEMINUTES: Date.now() + 300 * 1000,  // 五分钟
 }
 
+const maxWrongAttemptsByIPperDay = 50;       // 允许IP每天运行尝试的最大错误数
+const maxConsecutiveFailsByUsernameAndIP = 5; // 允许用户名和IP最大连续失败次数
+
+const limiterSlowBruteByIP = new RateLimiterRedis({
+    storeClient: redisClient,
+    keyPrefix: 'login_fail_ip_per_day',
+    points: maxWrongAttemptsByIPperDay,
+    duration: 60 * 60 * 24,
+    blockDuration: 60 * 60 * 24,
+})
+const limiterConsecutiveFailsByUsernameAndIP = new RateLimiterRedis({
+    storeClient: redisClient,
+    keyPrefix: 'login_fail_consecutive_username_and_ip',
+    points: maxConsecutiveFailsByUsernameAndIP,
+    duration: 60 * 60 * 24, // 从第一次失败开始存储24小时
+    blockDuration: 60 * 15, // 阻塞15分钟
+});
 // 创建随机验证码
 const createRandomToken = randomBytesAsync(4)
     .then((buf) => buf.toString('hex'));
@@ -45,6 +64,8 @@ const resetEmailToken = (user) => {
     user.emailExpires = undefined;
     user.isEmailActivated = true;
 }
+// 获取用户名和IP地址
+const getUsernameAndIPKey = (username, ip) => `${username}_${ip}`;
 
 const router = express.Router();
 /**
@@ -77,15 +98,58 @@ router.post('/signup',
  * @param password [用户密码]
  */
 router.post('/login', async (req, res, next) => {
+    if (!validator.isLength(req.body.password, { min: 8 })) {
+        return res.status(422).json({ message: 'Password must be at least 8 characters long.' });
+    }
+
+    const ipAddr = req.ip;
+    const usernameAndIPKey = getUsernameAndIPKey(req.body.email, ipAddr);
+
+    const [resUsernameAndIP, resSlowByIP] = await Promise.all([
+        limiterConsecutiveFailsByUsernameAndIP.get(usernameAndIPKey),
+        limiterSlowBruteByIP.get(ipAddr),
+    ]);
+
+    let retrySecs = 0;
+
+    if (resSlowByIP !== null && resSlowByIP.consumedPoints > maxWrongAttemptsByIPperDay) {
+        retrySecs = Math.round(resSlowByIP.msBeforeNext / 1000) || 1;
+    } else if (resUsernameAndIP !== null && resUsernameAndIP.consumedPoints > maxConsecutiveFailsByUsernameAndIP) {
+        retrySecs = Math.round(resUsernameAndIP.msBeforeNext / 1000) || 1;
+    }
+
+    if (retrySecs > 0) {
+        res.set('Retry-After', String(retrySecs));
+        return res.status(429).json({ message: 'Too Many Requests.' });
+    }
     passport.authenticate('login', async (err, user, info) => {
         try {
-            if (err || !user) {
-                return res.status(422).json(info);
+            if (err) {
+                return next(err);
+            } else if (!user) {
+                try {
+                    const promises = [limiterSlowBruteByIP.consume(ipAddr)];
+                    if (info.message === 'Invalid password.') {
+                        promises.push(limiterConsecutiveFailsByUsernameAndIP.consume(usernameAndIPKey));
+                    }
+                    await Promise.all(promises);
+                    return res.status(422).json({ message: 'Invalid email or password.' });
+                } catch (rlRejected) {
+                    if (rlRejected instanceof Error) {
+                        throw rlRejected;
+                    } else {
+                        res.set('Retry-After', String(retrySecs));
+                        return res.status(429).json({ message: 'Too Many Requests.' });
+                    }
+                }
             }
             req.login(user, { session: false }, async (error) => {
                 if (error) { return next(error); }
                 const body = { _id: user._id, email: user.email };
                 const token = jwt.sign({ user: body }, process.env.TOP_SECRET, { expiresIn: '14d' });
+                if (resUsernameAndIP !== null && resUsernameAndIP.consumedPoints > 0) {
+                    await limiterConsecutiveFailsByUsernameAndIP.delete(usernameAndIPKey);
+                }
                 return res.json({ 'message': info.message, token });
             });
         } catch (error) {
