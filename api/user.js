@@ -5,16 +5,13 @@
 const express = require('express');
 const passport = require('passport');
 const jwt = require('jsonwebtoken');
-const { promisify } = require('util');
-const crypto = require('crypto');
-const validator = require('validator');
+const { isEmail, isLength } = require('validator');
 const UserModel = require('../models/User');
 const { RateLimiterRedis } = require('rate-limiter-flexible');
 const { redisClient } = require('../config/conn');
+const { publishMessage } = require('../services/emailWorker');
 // 引入配置
 require('dotenv').config('../config/.env');
-
-const randomBytesAsync = promisify(crypto.randomBytes);
 
 const EXPIRES_TIME = { // 过期时间
     ONEDAY: Date.now() + 24 * 3600 * 1000, // 一天
@@ -28,6 +25,7 @@ const limiterSlowBruteByIP = new RateLimiterRedis({
     storeClient: redisClient,
     keyPrefix: 'login_fail_ip_per_day',
     points: maxWrongAttemptsByIPperDay,
+    inmemoryBlockOnConsumed: maxWrongAttemptsByIPperDay,
     duration: 60 * 60 * 24,
     blockDuration: 60 * 60 * 24,
 })
@@ -35,29 +33,11 @@ const limiterConsecutiveFailsByUsernameAndIP = new RateLimiterRedis({
     storeClient: redisClient,
     keyPrefix: 'login_fail_consecutive_username_and_ip',
     points: maxConsecutiveFailsByUsernameAndIP,
+    inmemoryBlockOnConsumed: maxConsecutiveFailsByUsernameAndIP,
     duration: 60 * 60 * 24, // 从第一次失败开始存储24小时
     blockDuration: 60 * 15, // 阻塞15分钟
 });
-// 创建随机验证码
-const createRandomToken = randomBytesAsync(4)
-    .then((buf) => buf.toString('hex'));
-// 设置随机验证码
-const setRandomToken = (token, expires_time, user) => {
-    user.emailToken = token;
-    user.emailExpires = expires_time;
-    user.save();
-    return [token, user.email];
-}
-// 发送验证邮件
-const sendVerifyEmail = (user, expires_time, title, content) => {
-    createRandomToken
-        .then((token) => setRandomToken(token, expires_time, user))
-        .then(([token, email]) => {
-            console.log(`<${email}>${title} - ${content}${token}_${expires_time}`);
-            /* mailer(email, title, `${content}${token}`)
-                .catch(err => console.error(err)); */
-        });
-}
+
 // 重置邮箱验证码和过期时间
 const resetEmailToken = (user) => {
     user.emailToken = undefined;
@@ -88,7 +68,13 @@ router.post('/signup',
                 email,
             },
         });
-        sendVerifyEmail(req.user, EXPIRES_TIME.ONEDAY, '绑定邮箱', '绑定邮箱的验证码');
+        const mailOption = {
+            user: req.user,
+            expires_time: EXPIRES_TIME.ONEDAY,
+            title: '绑定邮箱',
+            content: '绑定邮箱的验证码',
+        }
+        publishMessage(mailOption);
     }
 );
 /**
@@ -98,7 +84,7 @@ router.post('/signup',
  * @param password [用户密码]
  */
 router.post('/login', async (req, res, next) => {
-    if (!validator.isLength(req.body.password, { min: 8 })) {
+    if (!isLength(req.body.password, { min: 8 })) {
         return res.status(422).json({ message: 'Password must be at least 8 characters long.' });
     }
 
@@ -175,7 +161,13 @@ router.post('/verifyemail', async (req, res) => {
                 res.json({ message: 'Please verify your email.' });
             } else {
                 res.json({ message: 'Please verify your email.' });
-                sendVerifyEmail(user, EXPIRES_TIME.ONEDAY, '绑定邮箱', '绑定邮箱的验证码');
+                const mailOption = {
+                    user,
+                    expires_time: EXPIRES_TIME.ONEDAY,
+                    title: '绑定邮箱',
+                    content: '绑定邮箱的验证码',
+                }
+                publishMessage(mailOption);
             }
         });
 });
@@ -186,10 +178,10 @@ router.post('/verifyemail', async (req, res) => {
  * @param emailToken [绑定邮箱的验证码]
  */
 router.post('/verifyemailtoken', async (req, res, next) => {
-    if (!validator.isEmail(req.body.email)) {
+    if (!isEmail(req.body.email)) {
         return res.status(422).json({ message: 'Please confirm your email address.' });
     }
-    if (!validator.isLength(req.body.emailToken, { min: 8 })) {
+    if (!isLength(req.body.emailToken, { min: 8 })) {
         return res.status(422).json({ message: 'The email token must be at least 8 characters long.' });
     }
     const email = req.body.email;
@@ -225,7 +217,13 @@ router.post('/resetpassword', async (req, res) => {
                 res.status(422).json({ message: 'Please verify your email.' });
             } else if (user.isEmailActivated) {
                 res.json({ message: 'Please verify your email.' });
-                sendVerifyEmail(user, EXPIRES_TIME.FIVEMINUTES, '重置密码', '重置密码的验证码');
+                const mailOption = {
+                    user,
+                    expires_time: EXPIRES_TIME.FIVEMINUTES,
+                    title: '重置密码',
+                    content: '重置密码的验证码',
+                }
+                publishMessage(mailOption);
             } else {
                 res.status(422).json({ message: 'Please bind your email.' });
             }
@@ -239,14 +237,14 @@ router.post('/resetpassword', async (req, res) => {
  * @param emailToken [重置密码的邮箱验证码]
  */
 router.post('/resetpasswordtoken', async (req, res, next) => {
-    if (!validator.isEmail(req.body.email)) {
+    if (!isEmail(req.body.email)) {
         return res.status(422).json({ message: 'Please confirm your email address.' });
     }
     // 验证密码的格式
-    if (!validator.isLength(req.body.password, { min: 8 })) {
+    if (!isLength(req.body.password, { min: 8 })) {
         return res.status(422).json({ message: 'Password must be at least 8 characters long.' });
     }
-    if (!validator.isLength(req.body.emailToken, { min: 8 })) {
+    if (!isLength(req.body.emailToken, { min: 8 })) {
         return res.status(422).json({ message: 'The email token must be at least 8 characters long.' });
     }
     const email = req.body.email;

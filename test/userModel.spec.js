@@ -16,7 +16,7 @@ before((done) => {
         useNewUrlParser: true,    // 启用新的字符串连接解释器
         useUnifiedTopology: true, // 启用新的拓扑引擎,删除几个旧的连接选项
     })
-    .then(() => { /* console.log('MongoDB connection succeeded'); */ });
+    .then(() => { /* console.log('MongoDB connection successful...'); */ });
     mongoose.connection.on('error', error => console.error(error));
     mongoose.Promise = global.Promise;
     done();

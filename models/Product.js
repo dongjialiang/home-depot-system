@@ -18,6 +18,8 @@ const productSchema = new Schema({
     size: String,
     price: String,
     is_new: String,
+    online_sellable: Boolean,
+    colors: Array,
     pic_array: Array,
     desc: Array,
     designer_thought: Array,

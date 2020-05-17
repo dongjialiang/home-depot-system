@@ -1,6 +1,9 @@
 @url = http://localhost:7326
 
 @json = Content-Type: application/json
+@jsonWebToken = Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7Il9pZCI6IjVlYmY5MzJhMzBkN2YzMjFiNDNiZjA5MiIsImVtYWlsIjoibGpkOTcyNkAxNjMuY29tIn0sImlhdCI6MTU4OTYxMzQxNCwiZXhwIjoxNTkwODIzMDE0fQ.8H1fV1kDEo3FVRF8w5R_cai3xWF_GjFJiPc8QTACIYE
+@adminJsonWebToken = Authorization: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7Il9pZCI6IjVlYzEzYTFiYmVjZTc5MjFiY2E0NGY0MiIsInVzZXJuYW1lIjoiMTIzIiwibWFuYWdlciI6dHJ1ZX0sImlhdCI6MTU4OTcyMjA1NCwiZXhwIjoxNTkwOTMxNjU0fQ.217Gryln2dOQi_ckJRNtlxeTJE1R3PiOJsbb8Qzzb1c
+@shoppingcart_id = 5ec0f482f22e9e0e409a73c9
 
 ### 注册
 POST  {{url}}/api/user/signup
@@ -20,15 +23,89 @@ POST  {{url}}/api/user/login
     "password": "87654321"
 }
 
+### 发送邮箱验证码
+POST  {{url}}/api/user/verifyemail
+{{json}}
+
+{
+    "email": "ljd9726@163.com"
+}
+
 ### 个人信息
 GET {{url}}/api/secure/profile
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7Il9pZCI6IjVlOWM1ODgxZTgyMmQ3MjNmYzllOWMwYyIsImVtYWlsIjoibGpkOTcyNkAxNjMuY29tIn0sImlhdCI6MTU4ODQ5NTc0MCwiZXhwIjoxNTg5NzA1MzQwfQ.v6LFezJlWAHT1a2g0RpfKdK9CAzD353mLByMOzuW2ak
+{{jsonWebToken}}
 
 ### 通过产品id获取产品信息
 GET {{url}}/api/product/70171927/{pic_array,desc}
 
 ### 获取根据参数查询的符合的产品信息
-GET {{url}}/api/products/b_title=家具&s_title=衣柜/{price,size}
+GET {{url}}/api/product/all/b_title=家具&s_title=衣柜/{price,size}
 
 ### 根据产品id获取产品库存
 GET {{url}}/api/product/70171927/stores/585
+
+### 根据产品id和商场代号添加购物车
+POST {{url}}/api/shoppingcart/70171927/585/add
+{{jsonWebToken}}
+{{json}}
+
+{
+    "num": 1
+}
+
+### 根据购物车id删除购物车
+DELETE {{url}}/api/shoppingcart/{{shoppingcart_id}}/remove
+{{jsonWebToken}}
+
+### 根据购物车id修改购物车内容
+PUT {{url}}/api/shoppingcart/{{shoppingcart_id}}/update
+{{jsonWebToken}}
+{{json}}
+
+{
+    "product_id": 70171927,
+    "num": 5
+}
+
+### 管理员注册
+POST  {{url}}/api/admin/user/signup
+{{json}}
+
+{
+    "username": "123",
+    "password": "87654321"
+}
+
+### 管理员登录
+POST  {{url}}/api/admin/user/login
+{{json}}
+
+{
+    "username": "123",
+    "password": "87654321"
+}
+
+### 管理员新建产品
+POST {{url}}/api/admin/product/add
+{{adminJsonWebToken}}
+{{json}}
+
+{
+    "product_id": "hjgfhsjfhgjdfhjd",
+    "type_name": "网帘，一幅",
+    "price": "¥ 39.90"
+}
+
+### 管理员根据产品id修改产品信息
+PATCH {{url}}/api/admin/product/hjgfhsjfhgjdfhjd/update
+{{adminJsonWebToken}}
+{{json}}
+
+{
+    "type_name": "网帘，两幅",
+    "price": "¥ 29.90"
+}
+
+### 管理员根据产品id删除购物车
+DELETE {{url}}/api/admin/product/hjgfhsjfhgjdfhjd/delete
+{{adminJsonWebToken}}

@@ -3,11 +3,30 @@
  */
 "use strict";
 // 引入依赖
+const crypto = require('crypto');
 const nodemailer = require("nodemailer");
+const { promisify } = require('util');
+const UserModel = require('../models/User');
 // 引入配置
 require('dotenv').config({ path: `${process.cwd()}/config/.env` });
 
-const mailer = async function mailer(to, subject, html) {
+const randomBytesAsync = promisify(crypto.randomBytes);
+// 创建随机验证码
+const createRandomToken = randomBytesAsync(4)
+    .then((buf) => buf.toString('hex'));
+// 设置随机验证码
+const setRandomToken = (token, expires_time, user) => {
+    user.emailToken = token;
+    user.emailExpires = expires_time;
+    // user.save();
+    UserModel.updateOne({ _id: user._id }, {
+        emailToken: user.emailToken,
+        emailExpires: user.emailExpires,
+    });
+    return [token, user.email];
+}
+async function mailer(to, subject, html) {
+    // console.log(`<${to}>${subject} - ${html}`);
     let transporter = nodemailer.createTransport({
         host: "smtp.163.com",
         port: 465,
@@ -25,6 +44,15 @@ const mailer = async function mailer(to, subject, html) {
         html,
     });
 
-    console.log("Message sent: %s", info.messageId);
+    return info.messageId;
 }
-module.exports = mailer;
+// 发送验证邮件
+const sendVerifyEmail = (user, expires_time, title, content) => {
+    createRandomToken
+        .then((token) => setRandomToken(token, expires_time, user))
+        .then(([token, email]) => {
+            mailer(email, title, `${content}${token}`)
+                .catch(err => console.error(err));
+        });
+}
+module.exports = { sendVerifyEmail };

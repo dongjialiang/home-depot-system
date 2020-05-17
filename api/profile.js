@@ -1,13 +1,9 @@
 // 引入依赖
-const express = require('express');
-
-const router = express.Router();
-
-router.get('/profile', (req, res) => {
-    res.json({
+const profileRoute = (req, res) => {
+    return res.json({
         message: 'You made it to the secure route.',
         user: req.user,
     });
-});
+};
 
-module.exports = router;
+module.exports = profileRoute;
