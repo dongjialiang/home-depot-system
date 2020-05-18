@@ -37,6 +37,7 @@ const getProductionStockCheckNum = async (product_id, store_check_num, product_i
 // 查询商品对应信息
 const queryProductInfo = (result, schema) => {
     const product = {};
+    product['product_id'] = result['product_id'];
     schema.split(',').map(v => {
         product[v] = result[v];
     });
@@ -75,20 +76,35 @@ ProductRoute.get('/:product_id/:schema', async (req, res) => {
 });
 /**
  * GET /all/:query_params/:schema
- * 根据产品ID获取产品信息
+ * 根据查询规则获取产品信息
  * @param query_params [产品搜索关键词]
  * @param schema       [获取规则]
+ * @param page         [页码]
  */
-ProductRoute.get('/all/:query_params/:schema', async (req, res) => {
+ProductRoute.get('/all/:query_params/:schema/:page', async (req, res) => {
     const query_params = req.params.query_params;
     const schema = req.params.schema.replace(/[{}]/g, '');
+    const page = req.params.page;
+    const page_size = 24;
     const filter_query = {};
-    query_params.split('&').map(v => {
+    const string_filter_param = ['b_title', 's_title', 'name', 'is_new', 'online_sellable', 'type_name'];
+    await query_params.split('&').map(v => {
         const query_param = v.split('=');
-        filter_query[query_param[0]] = query_param[1];
+        if (string_filter_param.includes(query_param[0])) {
+            filter_query[query_param[0]] = query_param[1];
+        }
+        if (query_param[0] === 'color') {
+            filter_query['colors.name'] = query_param[1];
+        }
+        if (query_param[0] === 'price') {
+            price_range = query_param[1].split('-');
+            filter_query['price'] = {$gte: parseFloat(price_range[0]), $lte: parseFloat(price_range[1])};
+        }
     });
     ProductModel
         .find(filter_query)
+        .skip((page - 1) * page_size)
+        .limit(page_size)
         .then(products => {
             if (!products) {
                 return res.status(422).json({
@@ -104,7 +120,7 @@ ProductRoute.get('/all/:query_params/:schema', async (req, res) => {
 });
 /**
  * GET /:product_id/stores/:store_check_num
- * 根据产品ID获取产品信息
+ * 根据产品ID获取产品库存
  * @param product_id      [产品id]
  * @param store_check_num [库存地址的代号]
  */
@@ -182,19 +198,16 @@ ShoppingCartRoute.delete('/:shoppingcart_id/remove', async (req, res) => {
     });
 });
 /**
- * PUT /:shoppingcart_id/update
+ * PATCH /:shoppingcart_id/update
  * 从购物车删除商品
  * @param shoppingcart_id [购物车id]
+ * @param num             [购物车数量]
  */
-ShoppingCartRoute.put('/:shoppingcart_id/update', async (req, res) => {
+ShoppingCartRoute.patch('/:shoppingcart_id/update', async (req, res) => {
     const shoppingcart_id = req.params.shoppingcart_id;
-    const product_id = req.body.product_id;
     const num = req.body.num;
-    const user_id = req.user._id;
     ShoppingCartModel.findOneAndUpdate({ _id: shoppingcart_id }, {
-        product_id,
         num,
-        user_id
     }, (err, data) => {
         if (err) {
             console.error(err);

@@ -39,7 +39,7 @@ GET {{url}}/api/secure/profile
 GET {{url}}/api/product/70171927/{pic_array,desc}
 
 ### 获取根据参数查询的符合的产品信息
-GET {{url}}/api/product/all/b_title=家具&s_title=衣柜/{price,size}
+GET {{url}}/api/product/all/b_title=家具&s_title=吧台家具&price=100.00-600.00&color=黑色/{price,size,colors}/1
 
 ### 根据产品id获取产品库存
 GET {{url}}/api/product/70171927/stores/585
@@ -58,12 +58,11 @@ DELETE {{url}}/api/shoppingcart/{{shoppingcart_id}}/remove
 {{jsonWebToken}}
 
 ### 根据购物车id修改购物车内容
-PUT {{url}}/api/shoppingcart/{{shoppingcart_id}}/update
+PATCH {{url}}/api/shoppingcart/{{shoppingcart_id}}/update
 {{jsonWebToken}}
 {{json}}
 
 {
-    "product_id": 70171927,
     "num": 5
 }
 

@@ -16,6 +16,7 @@
 * **MONGODB_CONNURL** **mongodb**的连接地址
 * **MONGODB_TESTCONNURL** **mongodb**测试用的连接地址
 * **TOP_SECRET** **jsonWebToken**的私钥
+* **AMQP_SERVER** **rabbitmq**的连接地址
 
 ### Install via npm
 ```
