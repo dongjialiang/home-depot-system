@@ -6,7 +6,7 @@ const request = require('supertest');
 const { expect } = require('chai');
 const app = require('../server'); // 直接使用服务器测试
 // const app = 'http://localhost:7326'; // 在服务器开启的情况下通过URL测试
-const { before, beforeEach, describe, it } = require('mocha');
+const { before, describe, it } = require('mocha');
 
 const UserModel = require('../models/User');
 // 引入配置
@@ -14,16 +14,6 @@ require('dotenv').config({ path: `${process.cwd()}/config/.env` });
 
 let jwtToken;
 let resetPasswordToken;
-before((done) => {
-    UserModel.deleteOne({
-        email: 'ljd9726@163.com',
-    }).then((err, user) => {
-        if (err || !user) {
-            return done();
-        }
-        done();
-    });
-});
 // 测试注册接口
 describe("POST /signup", () => {
     it('1. should "Please enter a valid email address."', (done) => {
@@ -159,7 +149,7 @@ describe('POST /verifyemail', () => {
 // 测试邮箱绑定接口
 describe('POST /verifyemailtoken', () => {
     let emailToken;
-    beforeEach((done) => {
+    before((done) => {
         UserModel
             .findOne({ email: 'ljd9726@163.com' })
             .then((user) => {
@@ -183,17 +173,17 @@ describe('POST /verifyemailtoken', () => {
     });
     it('2. should "Verify email Successful!"', (done) => {
         request(app)
-        .post('/api/user/verifyemailtoken')
-        .send({
-            email: 'ljd9726@163.com',
-            emailToken,
-        })
-        .expect(200)
-        .end((err, res) => {
-            if (err) { return done(err); }
-            expect(res.body.message).equal('Verify email Successful!');
-            done();
-        });
+            .post('/api/user/verifyemailtoken')
+            .send({
+                email: 'ljd9726@163.com',
+                emailToken,
+            })
+            .expect(200)
+            .end((err, res) => {
+                if (err) { return done(err); }
+                expect(res.body.message).equal('Verify email Successful!');
+                done();
+            });
     });
 });
 // 测试发送重置密码的邮件接口
@@ -240,7 +230,7 @@ describe('POST /resetpassword', () => {
 });
 // 测试发送重置密码的邮件接口
 describe('POST /resetpasswordtoken', () => {
-    beforeEach((done) => {
+    before((done) => {
         UserModel
             .findOne({ email: 'ljd9726@163.com' })
             .then((user) => {

@@ -31,21 +31,29 @@ if (process.env.NODE_ENV === 'production') {
 app.use(helmet());
 // app.use(rateLimiterMiddleware);
 
-// 配置路由
+// 导入路由
 const userRoute = require('./api/user');
-const { adminRoute, adminProductRoute } = require('./api/admin');
-const { ProductRoute, ShoppingCartRoute } = require('./api/product');
+const { adminRoute, adminUserRoute, adminProductRoute, adminOrderRoute } = require('./api/admin');
+const { ProductRoute } = require('./api/product');
+const { ShoppingCartRoute } = require('./api/shoppingcart');
+const { OrderRoute } = require('./api/order');
 const profileRoute = require('./api/profile');
 const { uploadAvatar, uploadImages } = require('./api/upload');
+// 配置路由
 app.use('/images', express.static(path.join(__dirname, 'uploads'), { maxAge: 31557600000 }));
 app.use('/api/user', userRoute);
-app.use('/api/admin/user', adminRoute);
 app.use('/api/secure', authenticate, profileRoute);
-app.use('/api/product', ProductRoute);
-app.use('/api/admin/product', authenticate, adminProductRoute);
-app.use('/api/shoppingcart', authenticate, ShoppingCartRoute);
 app.post('/api/avatar', upload.single('avatar'), uploadAvatar);
 app.post('/api/images', upload.array('images', 20), uploadImages);
+
+app.use('/api/product', ProductRoute);
+app.use('/api/shoppingcart', authenticate, ShoppingCartRoute);
+app.use('/api/order', authenticate, OrderRoute);
+
+app.use('/api/admin/user', adminRoute);
+app.use('/api/admin/user_control', authenticate, adminUserRoute);
+app.use('/api/admin/product', authenticate, adminProductRoute);
+app.use('/api/admin/order', authenticate, adminOrderRoute);
 
 // 服务器设置
 const PORT = process.env.PORT || 7326;

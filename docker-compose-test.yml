@@ -12,14 +12,80 @@ services:
             options:
                 max-size: "200k"
                 max-file: "10"
-    mongo:
+    # mongo:
+    #     image: mongo:latest
+    #     ports:
+    #         - 27017:27017
+    #     restart: always
+        
+    #     volumes:
+    #         - /data/mongodb:/data/db
+    shard1:
         image: mongo:latest
+        command: mongod --shardsvr --dbpath /data/db --replSet shard1 --bind_ip_all
+        restart: always
+        hostname: shard1
+        container_name:
+            shard1
+        volumes:
+            - /data/mongodb/shard1:/data/db
+    shard2:
+        image: mongo:latest
+        command: mongod --shardsvr --directoryperdb --replSet shard2 --bind_ip_all
+        restart: always
+        hostname: shard2
+        container_name:
+            shard2
+        volumes:
+            - /data/mongodb/shard2:/data/db
+    shard3:
+        image: mongo:latest
+        command: mongod --shardsvr --directoryperdb --replSet shard3 --bind_ip_all
+        restart: always
+        hostname: shard3
+        container_name:
+            shard3
+        volumes:
+            - /data/mongodb/shard3:/data/db
+
+    config1:
+        image: mongo:latest
+        container_name:
+            config1
+        hostname: config1
+        command: mongod --configsvr --directoryperdb --replSet mongo-config-server --bind_ip_all
+        volumes:
+            - /data/mongodb/config1:/data/configdb
+    config2:
+        image: mongo:latest
+        container_name:
+            config2
+        hostname: config2
+        command: mongod --configsvr --directoryperdb --replSet mongo-config-server --bind_ip_all
+        volumes:
+            - /data/mongodb/config2:/data/configdb
+    config3:
+        image: mongo:latest
+        container_name:
+            config3
+        hostname: config3
+        command: mongod --configsvr --directoryperdb --replSet mongo-config-server --bind_ip_all
+        volumes:
+            - /data/mongodb/config3:/data/configdb
+
+    mongos:
+        image: mongo:latest
+        command: mongos --configdb mongo-config-server/config1:27019,config2:27019,config3:27019 --bind_ip 0.0.0.0 --port 27017
+        container_name:
+            mongos
         ports:
             - 27017:27017
-        restart: always
-        
-        volumes:
-            - /data/mongodata:/data
+        hostname: mongos
+        depends_on:
+            - config1
+            - config2
+            - config3
+
     redis:
         image: redis:alpine
         container_name: redis
@@ -28,4 +94,5 @@ services:
         hostname: redis
         restart: always   
         volumes:
-            - /data/redis:/data
+            - /data/redis:/data/redis
+    

@@ -7,6 +7,9 @@ const jwt = require('jsonwebtoken');
 const { isLength } = require('validator');
 const { RateLimiterRedis } = require('rate-limiter-flexible');
 const ProductModel = require('../models/Product');
+const OrderModel = require('../models/Order');
+const UserModel = require('../models/User');
+const { queryProductInfo } = require('../config/product-info');
 const { redisClient } = require('../config/conn');
 
 const maxWrongAttemptsByIPperDay = 50;       // 允许IP每天运行尝试的最大错误数
@@ -30,9 +33,11 @@ const limiterConsecutiveFailsByUsernameAndIP = new RateLimiterRedis({
 });
 // 获取用户名和IP地址
 const getUsernameAndIPKey = (username, ip) => `admin_${username}_${ip}`;
-
+// 创建路由
 const adminRoute = express.Router();
+const adminUserRoute = express.Router();
 const adminProductRoute = express.Router();
+const adminOrderRoute = express.Router();
 /**
  * POST /signup
  * 注册
@@ -135,7 +140,7 @@ adminProductRoute.post('/add', async (req, res) => {
         if (err) {
             console.error(err);
         }
-        if (data === null) {
+        if (!data) {
             return res.status(422).json({ message: 'The product is add failed.' });
         }
         res.json({ message: 'The product is add successful.' });
@@ -148,15 +153,15 @@ adminProductRoute.post('/add', async (req, res) => {
  * @param ...        [其他产品信息]
  */
 adminProductRoute.patch('/:product_id/update', async (req, res) => {
-    const product_id = await req.params.product_id;
     if (!req.user.manager) {
         return res.status(422).json({ message: 'The account is not manager.' });
     }
+    const product_id = await req.params.product_id;
     ProductModel.findOneAndUpdate({ product_id }, req.body, (err, data) => {
         if (err) {
             console.error(err);
         }
-        if (data === null) {
+        if (!data) {
             return res.status(422).json({ message: 'The product is update failed.' });
         }
         res.json({ message: 'The product is update successful.' });
@@ -168,19 +173,119 @@ adminProductRoute.patch('/:product_id/update', async (req, res) => {
  * @param product_id [产品id]
  */
 adminProductRoute.delete('/:product_id/delete', async (req, res) => {
-    const product_id = await req.params.product_id;
     if (!req.user.manager) {
         return res.status(422).json({ message: 'The account is not manager.' });
     }
+    const product_id = await req.params.product_id;
     ProductModel.findOneAndDelete({ product_id }, (err, data) => {
         if (err) {
             console.error(err);
         }
-        if (data === null) {
+        if (!data) {
             return res.status(422).json({ message: 'The product is delete failed.' });
         }
         res.json({ message: 'The product is delete successful.' });
     });
 });
+/**
+ * GET /all/:page/:schema
+ * 查看所有用户订单
+ * @param page   [页码]
+ * @param schema [获取订单的规则]
+ */
+adminOrderRoute.get('/all/:page/:schema', async (req, res) => {
+    if (!req.user.manager) {
+        return res.status(422).json({ message: 'The account is not manager.' });
+    }
+    const page = req.params.page;
+    const schema = req.params.schema.replace(/[{}]/g, '');
+    const page_size = 20;
+    OrderModel
+        .find()
+        .skip((page - 1) * page_size)
+        .limit(page_size)
+        .then((orders) => {
+            if (!orders) {
+                return res.status(422).json({ message: 'The orders is empty.' });
+            }
+            const orders_info = [];
+            orders.map(order => {
+                orders_info.push(queryProductInfo(order, schema));
+            });
+            return res.json({ orders_info });
+        });
+});
+/**
+ * PATCH /:order_id/:confirm
+ * 确认/取消确认用户订单
+ * @param order_id [页码]
+ * @param confirm  [订单确认状态]
+ */
+adminOrderRoute.patch('/:order_id/:confirm', async (req, res) => {
+    if (!req.user.manager) {
+        return res.status(422).json({ message: 'The account is not manager.' });
+    }
+    const order_id = req.params.order_id;
+    const confirm = req.params.confirm;
+    OrderModel
+        .findByIdAndUpdate(order_id, { confirm }, (err, data) => {
+            if (err) {
+                console.error(err);
+            }
+            if (!data) {
+                return res.status(422).json({ message: 'The order is confirm status change failed.' });
+            }
+            res.json({ message: 'The order is confirm status change successful.' });
+        });
+});
+/**
+ * GET /all/:page
+ * 查看所有用户
+ * @param page [页码]
+ */
+adminUserRoute.get('/all/:page', async (req, res) => {
+    if (!req.user.manager) {
+        return res.status(422).json({ message: 'The account is not manager.' });
+    }
+    const page = req.params.page;
+    const page_size = 20;
+    UserModel
+        .find()
+        .skip((page - 1) * page_size)
+        .limit(page_size)
+        .then((users) => {
+            if (!users) {
+                return res.status(422).json({ message: 'The users is empty.' });
+            }
+            const users_info = [];
+            users.map(user => {
+                users_info.push({ email: user.email });
+            });
+            return res.json({ users_info });
+        });
+});
+/**
+ * PATCH /:email/:banned
+ * 封禁/解封用户
+ * @param email  [邮箱]
+ * @param banned [用户封禁状态]
+ */
+adminUserRoute.patch('/:email/:banned', async (req, res) => {
+    if (!req.user.manager) {
+        return res.status(422).json({ message: 'The account is not manager.' });
+    }
+    const email = req.params.email;
+    const banned = req.params.banned;
+    UserModel
+        .findOneAndUpdate({ email }, { banned }, (err, data) => {
+            if (err) {
+                console.error(err);
+            }
+            if (!data) {
+                return res.status(422).json({ message: 'The user is banned status change failed.' });
+            }
+            res.json({ message: 'The user is banned status change successful.' });
+        });
+});
 
-module.exports = { adminRoute, adminProductRoute };
+module.exports = { adminRoute, adminUserRoute, adminProductRoute, adminOrderRoute };

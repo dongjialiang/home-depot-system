@@ -1,12 +1,13 @@
 @url = http://localhost:7326
 
 @json = Content-Type: application/json
-@jsonWebToken = Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7Il9pZCI6IjVlYmY5MzJhMzBkN2YzMjFiNDNiZjA5MiIsImVtYWlsIjoibGpkOTcyNkAxNjMuY29tIn0sImlhdCI6MTU4OTYxMzQxNCwiZXhwIjoxNTkwODIzMDE0fQ.8H1fV1kDEo3FVRF8w5R_cai3xWF_GjFJiPc8QTACIYE
+@jsonWebToken = Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7Il9pZCI6IjVlZDI2NWEzYmE0MWZhMWNiNDUxMDMyZCIsImVtYWlsIjoibGpkOTcyNkAxNjMuY29tIiwiYmFubmVkIjpmYWxzZX0sImlhdCI6MTU5MDg0NzQ1NiwiZXhwIjoxNTkyMDU3MDU2fQ.RyqJOpd50rENDpMPCZxAfRxNmXU4lbgbKpQ-Bqfq3Yg
 @adminJsonWebToken = Authorization: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7Il9pZCI6IjVlYzEzYTFiYmVjZTc5MjFiY2E0NGY0MiIsInVzZXJuYW1lIjoiMTIzIiwibWFuYWdlciI6dHJ1ZX0sImlhdCI6MTU4OTcyMjA1NCwiZXhwIjoxNTkwOTMxNjU0fQ.217Gryln2dOQi_ckJRNtlxeTJE1R3PiOJsbb8Qzzb1c
-@shoppingcart_id = 5ec0f482f22e9e0e409a73c9
+@shoppingcart_id = 5ed234d1eb61d931fc9d970a
+@order_id = 5ed251c4c6c9041964b67c86
 
 ### 注册
-POST  {{url}}/api/user/signup
+POST {{url}}/api/user/signup
 {{json}}
 
 {
@@ -15,7 +16,7 @@ POST  {{url}}/api/user/signup
 }
 
 ### 登录
-POST  {{url}}/api/user/login
+POST {{url}}/api/user/login
 {{json}}
 
 {
@@ -24,7 +25,7 @@ POST  {{url}}/api/user/login
 }
 
 ### 发送邮箱验证码
-POST  {{url}}/api/user/verifyemail
+POST {{url}}/api/user/verifyemail
 {{json}}
 
 {
@@ -53,10 +54,6 @@ POST {{url}}/api/shoppingcart/70171927/585/add
     "num": 1
 }
 
-### 根据购物车id删除购物车
-DELETE {{url}}/api/shoppingcart/{{shoppingcart_id}}/remove
-{{jsonWebToken}}
-
 ### 根据购物车id修改购物车内容
 PATCH {{url}}/api/shoppingcart/{{shoppingcart_id}}/update
 {{jsonWebToken}}
@@ -65,6 +62,44 @@ PATCH {{url}}/api/shoppingcart/{{shoppingcart_id}}/update
 {
     "num": 5
 }
+
+### 获取用户的购物车
+GET {{url}}/api/shoppingcart/all/1/{product_id,num,store_check_name}
+{{jsonWebToken}}
+
+### 根据购物车id删除购物车
+DELETE {{url}}/api/shoppingcart/{{shoppingcart_id}}/remove
+{{jsonWebToken}}
+
+### 根据订单消息提交订单
+POST {{url}}/api/order/70171927/585/add
+{{jsonWebToken}}
+{{json}}
+
+{
+    "first_name": "liang",
+    "last_name": "xiaodong",
+    "address": "moumouqumoumouzhenmoumoujiemoumoudongmoumoufang",
+    "phone": "17345678921",
+    "num": 1
+}
+
+### 根据订单id修改订单内容
+PATCH {{url}}/api/order/{{order_id}}/update
+{{jsonWebToken}}
+{{json}}
+
+{
+    "num": 5
+}
+
+### 获取用户的订单
+GET {{url}}/api/order/all/1/{product_id,num,store_check_name}
+{{jsonWebToken}}
+
+### 根据订单id取消订单
+DELETE {{url}}/api/order/{{order_id}}/remove
+{{jsonWebToken}}
 
 ### 管理员注册
 POST  {{url}}/api/admin/user/signup
@@ -105,6 +140,22 @@ PATCH {{url}}/api/admin/product/hjgfhsjfhgjdfhjd/update
     "price": "¥ 29.90"
 }
 
-### 管理员根据产品id删除购物车
+### 管理员根据产品id删除产品
 DELETE {{url}}/api/admin/product/hjgfhsjfhgjdfhjd/delete
+{{adminJsonWebToken}}
+
+### 管理员查看所有订单
+GET {{url}}/api/admin/order/all/1/{product_id,num,store_check_name}
+{{adminJsonWebToken}}
+
+### 管理员根据订单id确认/取消确认订单
+PATCH {{url}}/api/admin/order/{{order_id}}/true
+{{adminJsonWebToken}}
+
+### 管理员查看所有用户
+Get {{url}}/api/admin/user_control/all/1
+{{adminJsonWebToken}}
+
+### 管理员封禁/解封用户
+PATCH {{url}}/api/admin/user_control/ljd9726@163.com/true
 {{adminJsonWebToken}}

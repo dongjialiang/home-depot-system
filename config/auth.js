@@ -89,7 +89,10 @@ const authenticate = async (req, res, next) => {
     try {
         const raw = String(req.headers.authorization).split(' ').pop();
         const { user } = await jwt.verify(raw, process.env.TOP_SECRET);
-        req.user = await user;
+        if (user.banned) {
+            return res.status(422).json({message: 'The user is banned.'});
+        }
+        req.user = user;
         next();
     } catch (err) {
         return res.status(422).json({message: 'invalid signature.'});

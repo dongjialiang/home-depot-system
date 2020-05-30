@@ -1,5 +1,5 @@
 /**
- * 家具模型文件
+ * 购物车模型文件
  */
 // 引入依赖
 const mongoose = require('mongoose');
@@ -15,6 +15,7 @@ const shoppingCartSchema = new Schema({
         ref: 'User',
     },
     num: { type: Number, required: true },
+    store_check_name: String,
 });
 const ShoppingCartModel = mongoose.model('ShoppingCart', shoppingCartSchema);
 module.exports = ShoppingCartModel;
