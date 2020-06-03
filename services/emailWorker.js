@@ -1,5 +1,5 @@
 const amqp = require('amqplib');
-// const { mailer } = require('../config/mailer');
+const { mailer } = require('../config/mailer');
 
 require('dotenv').config('../config/.env');
 
@@ -26,8 +26,8 @@ const consumeMessage = () => {
                 return channel.consume(queue, (msg) => {
                     if (msg != null) {
                         const mailOption = JSON.parse(msg.content.toString());
-                        console.log(mailOption.email, mailOption.title, mailOption.content);
-                        // mailer(mailOption.email, mailOption.title, mailOption.content);
+                        // console.log(mailOption.email, mailOption.title, mailOption.content);
+                        mailer(mailOption.email, mailOption.title, mailOption.content);
                         channel.ack(msg);
                     }
                 })

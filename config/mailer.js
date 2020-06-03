@@ -9,9 +9,9 @@ require('dotenv').config({ path: `${process.cwd()}/config/.env` });
 
 async function mailer(to, subject, html) {
     let transporter = nodemailer.createTransport({
-        host: "smtp.163.com",
-        port: 465,
-        secure: true,
+        host: process.env.EMAIL_HOST,
+        port: process.env.EMAIL_PORT,
+        // secure: true,
         auth: {
             user: process.env.EMAIL_USER,
             pass: process.env.EMAIL_PASS,

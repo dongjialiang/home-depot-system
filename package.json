@@ -4,7 +4,7 @@
   "description": "The home depot system.",
   "main": "server.js",
   "scripts": {
-    "test": "cross-env NODE_ENV=production mocha test/*.spec.js --exit",
+    "test": "cross-env NODE_ENV=production mocha tests/*.spec.js --exit",
     "wrap": "nodemon server --ignore test/ --delay 2.5",
     "lint": "eslint \"**/*.js\"",
     "start": "cross-env NODE_ENV=production node server",

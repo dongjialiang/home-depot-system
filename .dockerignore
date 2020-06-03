@@ -24,3 +24,4 @@
 **/pnpm-lock.json
 **/yarn.lock
 **/package-lock.json
+**/config/.env.example

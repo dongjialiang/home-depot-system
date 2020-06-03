@@ -8,11 +8,11 @@ COPY package.json ./
 # 修改alpine软件仓库的镜像源
 RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.aliyun.com/g' /etc/apk/repositories
 # 修改hosts文件防止dns污染
-RUN echo '199.232.68.133 raw.githubusercontent.com' >> /etc/hosts
+RUN echo '199.232.68.133 raw.githubusercontent.com' >> /etc/hosts && rcnscd restart
 # 更新源
 RUN apk update && apk upgrade --available && sync
 # 安装编译依赖和部署依赖
-RUN apk --no-cache add --virtual builds-deps gcc nodejs npm
+RUN apk --no-cache add --virtual builds-deps gcc g++ make nodejs npm
 # 安装pnpm
 # RUN npm i pnpm -g --registry=https://registry.npm.taobao.org
 # 安装npm生产包依赖
