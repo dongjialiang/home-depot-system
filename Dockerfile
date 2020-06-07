@@ -13,8 +13,6 @@ RUN echo '199.232.68.133 raw.githubusercontent.com' >> /etc/hosts && rcnscd rest
 RUN apk update && apk upgrade --available && sync
 # 安装编译依赖和部署依赖
 RUN apk --no-cache add --virtual builds-deps gcc g++ make nodejs npm
-# 安装pnpm
-# RUN npm i pnpm -g --registry=https://registry.npm.taobao.org
 # 安装npm生产包依赖
 RUN npm install -S --registry=https://registry.npm.taobao.org
 # 删除编译依赖
@@ -28,4 +26,4 @@ COPY . .
 # 指定app运行的端口
 EXPOSE 7326
 # 启动镜像时运行服务器
-CMD ["pnpm", "cluster"]
+CMD ["npm", "cluster"]

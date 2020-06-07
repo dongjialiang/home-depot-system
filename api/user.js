@@ -82,17 +82,15 @@ const router = express.Router();
  */
 router.post('/signup',
     passport.authenticate('signup', { session: false }),
-    async (req, res) => {
+    async (req, res, next) => {
         if (req.user.message) {
             return res.status(422).json({ 'message': req.user.message });
         }
-        const email = req.user.email;
-        await res.json({
-            message: 'Signup successful.',
-            user: {
-                '_id': req.user._id,
-                email,
-            },
+        await req.login(req.user, { session: false }, async (error) => {
+            if (error) { return next(error); }
+            const body = { _id: req.user._id, email: req.user.email, banned: req.user.banned };
+            const token = jwt.sign({ user: body }, process.env.TOP_SECRET, { expiresIn: '14d' });
+            res.json({ 'message': 'Signup successful.', user: body, token });
         });
         sendVerifyEmail(req.user, EXPIRES_TIME.ONEDAY, '绑定邮箱', '绑定邮箱的验证码');
     }

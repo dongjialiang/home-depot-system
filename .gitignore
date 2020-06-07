@@ -5,3 +5,5 @@ uploads
 logs
 yarn.lock
 pnpm-lock.yaml
+config/shard-enable.sh
+config/redis*.conf

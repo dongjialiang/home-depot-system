@@ -1,0 +1,32 @@
+version: '3'
+services:
+    rabbitmq:
+        image: rabbitmq:management-alpine
+        container_name: rabbitmq
+        restart: always
+        ports:
+            - "15672:15672"
+            - "5672:5672"
+        logging:
+            driver: "json-file"
+            options:
+                max-size: "200k"
+                max-file: "10"
+
+    mongo:
+        image: mongo:latest
+        ports:
+            - 27017:27017
+        restart: always
+        volumes:
+            - /data/mongodb:/data/db
+
+    redis:
+        image: redis:alpine
+        container_name: redis
+        ports:
+            - 6379:6379
+        hostname: redis
+        restart: always
+        volumes:
+            - /data/redis:/data/redis

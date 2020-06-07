@@ -7,6 +7,12 @@
 @order_id = 5ed251c4c6c9041964b67c86
 
 ### 注册
+# 
+# POST /signup
+# 注册
+# @param email    [邮箱地址]
+# @param password [用户密码]
+# 
 POST {{url}}/api/user/signup
 {{json}}
 
@@ -16,6 +22,11 @@ POST {{url}}/api/user/signup
 }
 
 ### 登录
+# 
+# POST /login
+# @param email    [邮箱地址]
+# @param password [用户密码]
+# 
 POST {{url}}/api/user/login
 {{json}}
 
@@ -25,6 +36,11 @@ POST {{url}}/api/user/login
 }
 
 ### 发送邮箱验证码
+# 
+# POST /verifyemail
+# 发送带激活邮箱验证码的邮件
+# @param email [邮箱地址]
+# 
 POST {{url}}/api/user/verifyemail
 {{json}}
 

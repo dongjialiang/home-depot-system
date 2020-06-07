@@ -46,17 +46,15 @@ const adminOrderRoute = express.Router();
  */
 adminRoute.post('/signup',
     passport.authenticate('addadmin', { session: false }),
-    async (req, res) => {
+    async (req, res, next) => {
         if (req.user.message) {
             return res.status(422).json({ 'message': req.user.message });
         }
-        const username = req.user.username;
-        await res.json({
-            message: 'Signup successful.',
-            user: {
-                '_id': req.user._id,
-                username,
-            },
+        req.login(req.user, { session: false }, async (error) => {
+            if (error) { return next(error); }
+            const body = { _id: req.user._id, username: req.user.username, manager: req.user.manager, };
+            const token = jwt.sign({ user: body }, process.env.TOP_SECRET, { expiresIn: '14d' });
+            return res.json({ 'message': 'Signup successful.', user: body, token });
         });
     }
 );
@@ -119,7 +117,7 @@ adminRoute.post('/login', async (req, res, next) => {
                 if (resUsernameAndIP !== null && resUsernameAndIP.consumedPoints > 0) {
                     await limiterConsecutiveFailsByUsernameAndIP.delete(usernameAndIPKey);
                 }
-                return res.json({ 'message': info.message, token });
+                return res.json({ 'message': info.message, user: body, token });
             });
         } catch (error) {
             return next(error);

@@ -13,44 +13,27 @@ services:
                 max-size: "200k"
                 max-file: "10"
 
-    # mongo:
-    #     image: mongo:latest
-    #     ports:
-    #         - 27017:27017
-    #     restart: always
-    #     volumes:
-    #         - /data/mongodb:/data/db
-
     shard1:
         image: mongo:latest
-        command: mongod --shardsvr --dbpath /data/db --replSet shard1 --bind_ip_all
+        command: --shardsvr --dbpath /data/db --replSet shard1 --bind_ip_all
         restart: always
         container_name: shard1
-        depends_on:
-            - config1
-            - config2
-            - config3
         volumes:
-            - /data/mongodb/shard1/data/db:/data/db
-            - /data/mongodb/shard1/data/configdb:/data/configdb
+            - /data/mongodb/shard1:/data/db
 
     shard2:
         image: mongo:latest
-        command: mongod --shardsvr --directoryperdb --replSet shard2 --bind_ip_all
+        command: --shardsvr --directoryperdb --replSet shard2 --bind_ip_all
         restart: always
         container_name: shard2
-        depends_on:
-            - shard1
         volumes:
             - /data/mongodb/shard2:/data/db
 
     shard3:
         image: mongo:latest
-        command: mongod --shardsvr --directoryperdb --replSet shard3 --bind_ip_all
+        command: --shardsvr --directoryperdb --replSet shard3 --bind_ip_all
         restart: always
         container_name: shard3
-        depends_on:
-            - shard2
         volumes:
             - /data/mongodb/shard3:/data/db
 
@@ -58,7 +41,7 @@ services:
         image: mongo:latest
         container_name: config1
         restart: always
-        command: mongod --configsvr --directoryperdb --replSet mongo-config-server --bind_ip_all
+        command: --configsvr --directoryperdb --replSet mongo-config-server --bind_ip_all
         volumes:
             - /data/mongodb/config1:/data/configdb
 
@@ -66,7 +49,7 @@ services:
         image: mongo:latest
         container_name: config2
         restart: always
-        command: mongod --configsvr --directoryperdb --replSet mongo-config-server --bind_ip_all
+        command: --configsvr --directoryperdb --replSet mongo-config-server --bind_ip_all
         volumes:
             - /data/mongodb/config2:/data/configdb
 
@@ -74,7 +57,7 @@ services:
         image: mongo:latest
         container_name: config3
         restart: always
-        command: mongod --configsvr --directoryperdb --replSet mongo-config-server --bind_ip_all
+        command: --configsvr --directoryperdb --replSet mongo-config-server --bind_ip_all
         volumes:
             - /data/mongodb/config3:/data/configdb
 
@@ -89,17 +72,75 @@ services:
             - config1
             - config2
             - config3
-            - shard1
-        volumes:
-            - /data/mongodb/mongos1:/data/configdb
 
-    redis:
+    redis-1:
         image: redis:alpine
-        container_name: redis
+        container_name: redis-1
+        restart: always
         ports:
             - 6379:6379
-        hostname: redis
-        restart: always   
+            - 16379:16379
+        command: redis-server /usr/local/etc/redis/redis.conf
         volumes:
-            - /data/redis:/data/redis
+            - /data/redis/redis-1:/data/redis
+            - ./config/redis1.conf:/usr/local/etc/redis/redis.conf
+                
+    redis-2:
+        image: redis:alpine
+        container_name: redis-2
+        restart: always
+        ports:
+            - 6380:6380
+            - 16380:16380
+        command: redis-server /usr/local/etc/redis/redis.conf
+        volumes:
+            - /data/redis/redis-2:/data/redis
+            - ./config/redis2.conf:/usr/local/etc/redis/redis.conf
+
+    redis-3:
+        image: redis:alpine
+        container_name: redis-3
+        restart: always
+        ports:
+            - 6381:6381
+            - 16381:16381
+        command: redis-server /usr/local/etc/redis/redis.conf
+        volumes:
+            - /data/redis/redis-3:/data/redis
+            - ./config/redis3.conf:/usr/local/etc/redis/redis.conf
+
+    redis-4:
+        image: redis:alpine
+        container_name: redis-4
+        restart: always
+        ports:
+            - 6382:6382
+            - 16382:16382
+        command: redis-server /usr/local/etc/redis/redis.conf
+        volumes:
+            - /data/redis/redis-4:/data/redis
+            - ./config/redis4.conf:/usr/local/etc/redis/redis.conf
+
+    redis-5:
+        image: redis:alpine
+        container_name: redis-5
+        restart: always
+        ports:
+            - 6383:6383
+            - 16383:16383
+        command: redis-server /usr/local/etc/redis/redis.conf
+        volumes:
+            - /data/redis/redis-5:/data/redis
+            - ./config/redis5.conf:/usr/local/etc/redis/redis.conf
     
+    redis-6:
+        image: redis:alpine
+        container_name: redis-6
+        restart: always
+        ports:
+            - 6384:6384
+            - 16384:16384
+        command: redis-server /usr/local/etc/redis/redis.conf
+        volumes:
+            - /data/redis/redis-6:/data/redis
+            - ./config/redis6.conf:/usr/local/etc/redis/redis.conf

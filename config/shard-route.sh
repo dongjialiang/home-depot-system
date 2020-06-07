@@ -1,7 +1,0 @@
-docker-compose -f docker-compose-test.yml exec mongos bash -c "echo 'sh.addShard(\"shard1/shard1:27018\")' | mongo"
-docker-compose -f docker-compose-test.yml exec mongos bash -c "echo 'sh.addShard(\"shard2/shard2:27018\")' | mongo"
-docker-compose -f docker-compose-test.yml exec mongos bash -c "echo 'sh.addShard(\"shard3/shard3:27018\")' | mongo"
-docker-compose -f docker-compose-test.yml exec mongos bash -c "echo 'sh.enableSharding(\"myapp\")' | mongo"
-docker-compose -f docker-compose-test.yml exec mongos bash -c "echo 'sh.shardCollection(\"myapp.user\", {\"_id\": \"hashed\" })' | mongo"
-docker-compose -f docker-compose-test.yml exec mongos bash -c "echo 'sh.shardCollection(\"myapp.products\", {\"_id\": \"hashed\" })' | mongo"
-docker-compose -f docker-compose-test.yml exec mongos bash -c "echo 'sh.shardCollection(\"myapp.admin\", {\"_id\": \"hashed\" })' | mongo"

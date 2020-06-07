@@ -3,16 +3,29 @@
  */
 // 引入依赖
 const mongoose = require('mongoose');
-const redis = require('redis');
+// const redis = require('redis');
+const Redis = require('ioredis');
 // 引入配置
 require('dotenv').config({ path: `${process.cwd()}/config/.env` });
 // 设置连接地址
 const mongoDBConnUrl = process.env.MONGODB_CONNURL;
 const mongoDBTestConnUrl = process.env.MONGODB_TESTCONNURL;
+const redisConfig = process.env.REDIS_CONFIG;
 // 使用redis客户端
-const redisClient = redis.createClient({
-    enable_offline_queue: false,
-});
+let redisClient;
+if (redisConfig) {
+    const redisNodes = JSON.parse(redisConfig);
+    if (redisNodes.length > 1) {
+        redisClient = new Redis.Cluster(redisNodes, {
+            scaleReads: 'slave',
+            enableOfflineQueue: false,
+        });
+    } else if (redisNodes.length === 1) {
+        redisClient = new Redis(`redis://${redisNodes[0].host}:${redisNodes[0].port}`, {
+            enableOfflineQueue: false,
+        });
+    }
+}
 // mongoose连接mongodb数据库的设置
 mongoose.set('useCreateIndex', true);
 mongoose.connect(mongoDBConnUrl, {

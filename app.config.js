@@ -2,7 +2,7 @@ module.exports = {
     apps: [
         {
             name: 'app-master',
-            script: './app-master.js',
+            script: './services/app-master.js',
             instances: 1,
             autorestart: true,
             log_date_format: 'YYYY-MM-DD HH:mm:ss',
