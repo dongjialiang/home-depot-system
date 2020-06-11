@@ -1,0 +1,21 @@
+# bind 127.0.0.1 # 注释该处
+# 关闭保护模式
+protected-mode no
+# 改端口
+port 6379
+
+# 禁止redis后台运行
+daemonize no
+
+#
+pidfile /var/run/redis_6379.pid
+
+# 开启集群
+cluster-enabled yes
+cluster-config-file nodes-6379.conf
+# 外网或内网,宿主机IP
+cluster-announce-ip 192.168.118.128
+# 宣布的数据端口
+cluster-announce-port 6379
+# 宣布的总线端口
+cluster-announce-bus-port 16379

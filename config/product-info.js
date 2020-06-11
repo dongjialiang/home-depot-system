@@ -30,12 +30,16 @@ const getProductionStockCheckNum = async (product_id, store_check_num, product_i
 }
 // 查询商品对应信息
 const queryProductInfo = (result, schema) => {
-    const product = {};
-    product['product_id'] = result['product_id'];
-    schema.split(',').map(v => {
-        product[v] = result[v];
-    });
-    return product;
+    if (schema === 'all') { // 获取所有信息
+        return result;
+    } else { // 获取具体信息
+        const product = {};
+        product['product_id'] = result['product_id'];
+        schema.split(',').map(v => {
+            product[v] = result[v];
+        });
+        return product;
+    }
 }
 // 导出对应函数
 module.exports = { getProductionStockCheckNum, queryProductInfo };

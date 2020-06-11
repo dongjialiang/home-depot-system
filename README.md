@@ -26,7 +26,7 @@
 ## 启动运行环境的软件
 如果是使用docker和docker-compose, 可以参考 **deploy** 文件夹里的文件, 在windows环境开发建议更改后缀
 
-以下文件里的docker-compose-test.yml采用MongoDB集群和redis集群, 单机模式的可用docker-compose-standalone.yml进行替换, 目前这两个文件里的服务都没有采用用户验证的形式，并不安全，请在非生产的环境进行测试
+以下文件内容里的docker-compose-test.yml采用MongoDB集群和redis集群, 单机模式的可用docker-compose-standalone.yml进行替换, 目前这两个文件里的服务都没有采用用户验证的形式，并不安全，请在非生产的环境进行测试, 如果采用的是docker-compose-test.yml需要参考 **config/redis-cluster.conf.example** 创建redis配置文件, 分别为 **redis[1-6].conf**
 
 * docker-start.sh 构筑并启动容器, 使容器在后台运行
 * docker-stop.sh 关闭并删除容器

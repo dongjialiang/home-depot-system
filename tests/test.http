@@ -52,8 +52,11 @@ POST {{url}}/api/user/verifyemail
 GET {{url}}/api/secure/profile
 {{jsonWebToken}}
 
-### 通过产品id获取产品信息
+### 通过产品id获取产品信息(后面是具体需要获取的值)
 GET {{url}}/api/product/70171927/{pic_array,desc}
+
+### 通过产品id获取产品信息(全部信息)
+GET {{url}}/api/product/70171927/{all}
 
 ### 获取根据参数查询的符合的产品信息
 GET {{url}}/api/product/all/b_title=家具&s_title=吧台家具&price=100.00-600.00&color=黑色/{price,size,colors}/1

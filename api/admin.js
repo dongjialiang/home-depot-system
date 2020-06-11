@@ -15,19 +15,19 @@ const { redisClient } = require('../config/conn');
 const maxWrongAttemptsByIPperDay = 50;       // 允许IP每天运行尝试的最大错误数
 const maxConsecutiveFailsByUsernameAndIP = 5; // 允许用户名和IP最大连续失败次数
 
+// 
 const limiterSlowBruteByIP = new RateLimiterRedis({
     storeClient: redisClient,
     keyPrefix: 'login_fail_ip_per_day',
     points: maxWrongAttemptsByIPperDay,
-    inmemoryBlockOnConsumed: maxWrongAttemptsByIPperDay,
     duration: 60 * 60 * 24,
     blockDuration: 60 * 60 * 24,
-})
+});
+// 
 const limiterConsecutiveFailsByUsernameAndIP = new RateLimiterRedis({
     storeClient: redisClient,
     keyPrefix: 'login_fail_consecutive_username_and_ip',
     points: maxConsecutiveFailsByUsernameAndIP,
-    inmemoryBlockOnConsumed: maxConsecutiveFailsByUsernameAndIP,
     duration: 60 * 60 * 24, // 从第一次失败开始存储24小时
     blockDuration: 60 * 15, // 阻塞15分钟
 });
@@ -77,7 +77,7 @@ adminRoute.post('/login', async (req, res, next) => {
         limiterSlowBruteByIP.get(ipAddr),
     ]);
 
-    let retrySecs = 0;
+    let retrySecs = 0; // 重试需要秒数
 
     if (resSlowByIP !== null && resSlowByIP.consumedPoints > maxWrongAttemptsByIPperDay) {
         retrySecs = Math.round(resSlowByIP.msBeforeNext / 1000) || 1;
@@ -105,7 +105,7 @@ adminRoute.post('/login', async (req, res, next) => {
                     if (rlRejected instanceof Error) {
                         throw rlRejected;
                     } else {
-                        res.set('Retry-After', String(retrySecs));
+                        res.set('Retry-After', String(Math.round(rlRejected.msBeforeNext / 1000)) || 1);
                         return res.status(429).json({ message: 'Too Many Requests.' });
                     }
                 }
@@ -167,7 +167,7 @@ adminProductRoute.patch('/:product_id/update', async (req, res) => {
 });
 /**
  * DELETE /:product_id/delete
- * 管理员修改产品
+ * 管理员删除产品
  * @param product_id [产品id]
  */
 adminProductRoute.delete('/:product_id/delete', async (req, res) => {
