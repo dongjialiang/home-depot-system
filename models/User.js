@@ -5,7 +5,7 @@
 const mongoose = require('mongoose');
 const argon2 = require('argon2');
 const Schema = mongoose.Schema;
-
+// 编写规则
 const userSchema = new Schema({
     email: {
         type: String,
@@ -44,6 +44,9 @@ const comparePassword = async function(candidatePassword) { // 这里也不能�
     const compare = await argon2.verify(user.password, candidatePassword);
     return compare;
 };
+// 把解密函数挂载到方法里
 userSchema.methods.comparePassword = comparePassword;
+// 构筑模型
 const UserModel = mongoose.model('User', userSchema);
+// 导出模型
 module.exports = UserModel;

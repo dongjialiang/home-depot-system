@@ -4,7 +4,7 @@
 // 引入依赖
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
-
+// 编写规则
 const orderSchema = new Schema({
     product_id: {
         type: String,
@@ -25,5 +25,7 @@ const orderSchema = new Schema({
         default: false,
     },
 });
-const orderModel = mongoose.model('Order', orderSchema);
-module.exports = orderModel;
+// 构筑模型
+const OrderModel = mongoose.model('Order', orderSchema);
+// 导出模型
+module.exports = OrderModel;

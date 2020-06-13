@@ -95,7 +95,7 @@ OrderRoute.patch('/:order_id/update', async (req, res) => {
 });
 /**
  * GET /all/:page/:schema
- * 查看用户所有订单
+ * 查看自己的所有订单
  * @param page   [页码]
  * @param schema [获取订单的规则]
  */

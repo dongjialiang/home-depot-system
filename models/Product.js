@@ -4,7 +4,7 @@
 // 引入依赖
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
-
+// 编写规则
 const productSchema = new Schema({
     product_id: {
         type: String,
@@ -21,13 +21,15 @@ const productSchema = new Schema({
     online_sellable: Boolean,
     colors: Array,
     pic_array: Array,
-    desc: Array,
-    designer_thought: Array,
-    detail: Array,
-    doc: Array,
-    enviroment_and_material: Array,
-    instruction: Array,
-    size_array: Array
+    desc: String,
+    designer_thought: String,
+    detail: String,
+    doc: String,
+    enviroment_and_material: String,
+    instruction: String,
+    size_array: String
 });
+// 构筑模型
 const ProductModel = mongoose.model('Product', productSchema);
+// 导出模型
 module.exports = ProductModel;

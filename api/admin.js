@@ -202,7 +202,7 @@ adminOrderRoute.get('/all/:page/:schema', async (req, res) => {
         .find()
         .skip((page - 1) * page_size)
         .limit(page_size)
-        .then((orders) => {
+        .then(async (orders) => {
             if (!orders) {
                 return res.status(422).json({ message: 'The orders is empty.' });
             }
@@ -210,7 +210,8 @@ adminOrderRoute.get('/all/:page/:schema', async (req, res) => {
             orders.map(order => {
                 orders_info.push(queryProductInfo(order, schema));
             });
-            return res.json({ orders_info });
+            const total = await OrderModel.find().countDocuments();
+            return res.json({ orders_info, total });
         });
 });
 /**
@@ -251,15 +252,21 @@ adminUserRoute.get('/all/:page', async (req, res) => {
         .find()
         .skip((page - 1) * page_size)
         .limit(page_size)
-        .then((users) => {
+        .then(async (users) => {
             if (!users) {
                 return res.status(422).json({ message: 'The users is empty.' });
             }
             const users_info = [];
             users.map(user => {
-                users_info.push({ email: user.email });
+                users_info.push({
+                    _id: user._id,
+                    email: user.email,
+                    isEmailActivated: user.isEmailActivated,
+                    banned: user.banned,
+                });
             });
-            return res.json({ users_info });
+            const total = await UserModel.find().countDocuments();
+            return res.json({ users_info, total });
         });
 });
 /**

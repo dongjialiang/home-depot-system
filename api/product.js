@@ -52,32 +52,34 @@ ProductRoute.get('/all/:query_params/:schema/:page', async (req, res) => {
     const page = req.params.page;
     const page_size = 24;
     const filter_query = {};
-    const string_filter_param = ['b_title', 's_title', 'name', 'is_new', 'online_sellable', 'type_name'];
-    await query_params.split('&').map(v => {
-        const query_param = v.split('=');
-        if (string_filter_param.includes(query_param[0])) {
-            filter_query[query_param[0]] = query_param[1];
-        }
-        if (query_param[0] === 'color') {
-            filter_query['colors.name'] = query_param[1];
-        }
-        if (query_param[0] === 'price') {
-            const price_range = query_param[1].split('-');
-            const price_query = {};
-            if (price_range[0] != '') {
-                price_query['$gte'] = parseFloat(price_range[0]);
+    if (query_params !== 'all') {
+        const string_filter_param = ['b_title', 's_title', 'name', 'is_new', 'online_sellable', 'type_name'];
+        await query_params.split('&').map(v => {
+            const query_param = v.split('=');
+            if (string_filter_param.includes(query_param[0])) {
+                filter_query[query_param[0]] = query_param[1];
             }
-            if (price_range[1] != '') {
-                price_query['$lte'] = parseFloat(price_range[1]);
+            if (query_param[0] === 'color') {
+                filter_query['colors.name'] = query_param[1];
             }
-            filter_query['price'] = price_query;
-        }
-    });
+            if (query_param[0] === 'price') {
+                const price_range = query_param[1].split('-');
+                const price_query = {};
+                if (price_range[0] != '') {
+                    price_query['$gte'] = parseFloat(price_range[0]);
+                }
+                if (price_range[1] != '') {
+                    price_query['$lte'] = parseFloat(price_range[1]);
+                }
+                filter_query['price'] = price_query;
+            }
+        });
+    }
     ProductModel
         .find(filter_query)
         .skip((page - 1) * page_size)
         .limit(page_size)
-        .then(products => {
+        .then(async products => {
             if (!products) {
                 return res.status(422).json({
                     message: 'The products is empty.',
@@ -87,7 +89,8 @@ ProductRoute.get('/all/:query_params/:schema/:page', async (req, res) => {
             products.map(product => {
                 products_info.push(queryProductInfo(product, schema));
             });
-            return res.json({ products_info });
+            const total = await ProductModel.find(filter_query).countDocuments();
+            return res.json({ products_info, total });
         });
 });
 /**

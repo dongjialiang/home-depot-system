@@ -1,10 +1,11 @@
 @url = http://localhost:7326
+# @url = http://106.53.103.186
 
 @json = Content-Type: application/json
-@jsonWebToken = Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7Il9pZCI6IjVlZDI2NWEzYmE0MWZhMWNiNDUxMDMyZCIsImVtYWlsIjoibGpkOTcyNkAxNjMuY29tIiwiYmFubmVkIjpmYWxzZX0sImlhdCI6MTU5MDg0NzQ1NiwiZXhwIjoxNTkyMDU3MDU2fQ.RyqJOpd50rENDpMPCZxAfRxNmXU4lbgbKpQ-Bqfq3Yg
-@adminJsonWebToken = Authorization: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7Il9pZCI6IjVlYzEzYTFiYmVjZTc5MjFiY2E0NGY0MiIsInVzZXJuYW1lIjoiMTIzIiwibWFuYWdlciI6dHJ1ZX0sImlhdCI6MTU4OTcyMjA1NCwiZXhwIjoxNTkwOTMxNjU0fQ.217Gryln2dOQi_ckJRNtlxeTJE1R3PiOJsbb8Qzzb1c
-@shoppingcart_id = 5ed234d1eb61d931fc9d970a
-@order_id = 5ed251c4c6c9041964b67c86
+@jsonWebToken = Authorization: Bearer {{user_token.response.body.token}}
+@adminJsonWebToken = Authorization: Bearer {{admin_token.response.body.token}}
+@shoppingcart_id = {{shoppingcart_result.response.body._id}}
+@order_id = {{order_result.response.body._id}}
 
 ### 注册
 # 
@@ -13,6 +14,7 @@
 # @param email    [邮箱地址]
 # @param password [用户密码]
 # 
+# @name user_token
 POST {{url}}/api/user/signup
 {{json}}
 
@@ -27,6 +29,7 @@ POST {{url}}/api/user/signup
 # @param email    [邮箱地址]
 # @param password [用户密码]
 # 
+# @name user_token
 POST {{url}}/api/user/login
 {{json}}
 
@@ -65,6 +68,7 @@ GET {{url}}/api/product/all/b_title=家具&s_title=吧台家具&price=100.00-600
 GET {{url}}/api/product/70171927/stores/585
 
 ### 根据产品id和商场代号添加购物车
+# @name shoppingcart_result
 POST {{url}}/api/shoppingcart/70171927/585/add
 {{jsonWebToken}}
 {{json}}
@@ -82,7 +86,7 @@ PATCH {{url}}/api/shoppingcart/{{shoppingcart_id}}/update
     "num": 5
 }
 
-### 获取用户的购物车
+### 获取用户自己所有的购物车
 GET {{url}}/api/shoppingcart/all/1/{product_id,num,store_check_name}
 {{jsonWebToken}}
 
@@ -91,6 +95,7 @@ DELETE {{url}}/api/shoppingcart/{{shoppingcart_id}}/remove
 {{jsonWebToken}}
 
 ### 根据订单消息提交订单
+# @name order_result
 POST {{url}}/api/order/70171927/585/add
 {{jsonWebToken}}
 {{json}}
@@ -103,6 +108,10 @@ POST {{url}}/api/order/70171927/585/add
     "num": 1
 }
 
+### 获取用户自己所有的订单
+GET {{url}}/api/order/all/1/{all}
+{{jsonWebToken}}
+
 ### 根据订单id修改订单内容
 PATCH {{url}}/api/order/{{order_id}}/update
 {{jsonWebToken}}
@@ -112,15 +121,12 @@ PATCH {{url}}/api/order/{{order_id}}/update
     "num": 5
 }
 
-### 获取用户的订单
-GET {{url}}/api/order/all/1/{product_id,num,store_check_name}
-{{jsonWebToken}}
-
 ### 根据订单id取消订单
 DELETE {{url}}/api/order/{{order_id}}/remove
 {{jsonWebToken}}
 
 ### 管理员注册
+# @name admin_token
 POST  {{url}}/api/admin/user/signup
 {{json}}
 
@@ -130,6 +136,7 @@ POST  {{url}}/api/admin/user/signup
 }
 
 ### 管理员登录
+# @name admin_token
 POST  {{url}}/api/admin/user/login
 {{json}}
 
@@ -164,7 +171,7 @@ DELETE {{url}}/api/admin/product/hjgfhsjfhgjdfhjd/delete
 {{adminJsonWebToken}}
 
 ### 管理员查看所有订单
-GET {{url}}/api/admin/order/all/1/{product_id,num,store_check_name}
+GET {{url}}/api/admin/order/all/1/{all}
 {{adminJsonWebToken}}
 
 ### 管理员根据订单id确认/取消确认订单
