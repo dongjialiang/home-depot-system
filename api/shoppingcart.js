@@ -21,6 +21,8 @@ ShoppingCartRoute.post('/:product_id/:store_check_num/add', async (req, res) => 
     const store_check_num = req.params.store_check_num;
     const product_id = req.params.product_id;
     const num = req.body.num;
+    const pic = req.body.pic;
+    const price = req.body.price;
     const user_id = req.user._id;
     const store_check_name = store_check[store_check_num];
     const product_id_store_check_num = `${product_id}_${store_check_num}`;
@@ -29,6 +31,8 @@ ShoppingCartRoute.post('/:product_id/:store_check_num/add', async (req, res) => 
         user_id,
         num,
         store_check_name,
+        pic,
+        price
     };
     const shopping_cart = new ShoppingCartModel(product_of_shopping_cart);
     redisClient.get(product_id_store_check_num, async (err, data) => {
@@ -107,7 +111,7 @@ ShoppingCartRoute.get('/all/:page/:schema', async (req, res) => {
         .find({ user_id })
         .skip((page - 1) * page_size)
         .limit(page_size)
-        .then((shoppingcarts) => {
+        .then(async (shoppingcarts) => {
             if (!shoppingcarts) {
                 return res.status(422).json({ message: 'The shoppingcart is empty.' });
             }
@@ -115,7 +119,8 @@ ShoppingCartRoute.get('/all/:page/:schema', async (req, res) => {
             shoppingcarts.map(shoppingcart => {
                 shoppingcarts_info.push(queryProductInfo(shoppingcart, schema));
             });
-            return res.json({ shoppingcarts_info });
+            const total = await ShoppingCartModel.find({ user_id }).countDocuments();
+            return res.json({ shoppingcarts_info, total });
         });
 });
 // 导出路由

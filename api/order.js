@@ -37,10 +37,10 @@ OrderRoute.post('/:product_id/:store_check_num/add', async (req, res) => {
         let prouduct_available_stock = await JSON.parse(data);
         prouduct_available_stock = prouduct_available_stock || await getProductionStockCheckNum(product_id, store_check_num, product_id_store_check_num);
         if (prouduct_available_stock.available_stock <= 0) {
-            return res.status(422).json({message: 'The product is not available stock.'});
+            return res.status(422).json({message: 'The order is not available stock.'});
         }
         if (prouduct_available_stock.available_stock <= num) {
-            return res.status(422).json({message: 'The product is not enough.'});
+            return res.status(422).json({message: 'The order is not enough.'});
         }
         order.save((err, data) => {
             if (err) {
@@ -62,9 +62,9 @@ OrderRoute.delete('/:order_id/remove', async (req, res) => {
             console.error(err);
         }
         if (!data) {
-            return res.status(422).json({ message: 'The product is delete failed.' });
+            return res.status(422).json({ message: 'The order is delete failed.' });
         }
-        res.json({ message: 'The product is delete successful.' });
+        res.json({ message: 'The order is delete successful.' });
     });
 });
 /**
@@ -88,9 +88,27 @@ OrderRoute.patch('/:order_id/update', async (req, res) => {
             console.error(err);
         }
         if (!data) {
-            return res.status(422).json({ message: 'The product is update failed.' });
+            return res.status(422).json({ message: 'The order is update failed.' });
         }
-        res.json({ message: 'The product is update successful.' });
+        res.json({ message: 'The order is update successful.' });
+    });
+});
+/**
+ * Get /get/:order_id
+ * 获取订单
+ * @param order_id [购物车id]
+ */
+OrderRoute.get('/get/:order_id', async (req, res) => {
+    const order_id = req.params.order_id;
+    OrderModel.findOne({ _id: order_id },
+        (err, data) => {
+        if (err) {
+            console.error(err);
+        }
+        if (!data) {
+            return res.status(422).json({ message: 'The order is not exist.' });
+        }
+        res.json({ order_info: data });
     });
 });
 /**
@@ -108,7 +126,7 @@ OrderRoute.get('/all/:page/:schema', async (req, res) => {
         .find({ user_id })
         .skip((page - 1) * page_size)
         .limit(page_size)
-        .then((orders) => {
+        .then(async (orders) => {
             if (!orders) {
                 return res.status(422).json({ message: 'The orders is empty.' });
             }
@@ -116,7 +134,8 @@ OrderRoute.get('/all/:page/:schema', async (req, res) => {
             orders.map(order => {
                 orders_info.push(queryProductInfo(order, schema));
             });
-            return res.json({ orders_info });
+            const total = await OrderModel.find({ user_id }).countDocuments();
+            return res.json({ orders_info, total });
         });
 });
 // 导出路由

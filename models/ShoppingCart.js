@@ -14,8 +14,10 @@ const shoppingCartSchema = new Schema({
         type: String,
         ref: 'User',
     },
+    pic: String,
     num: { type: Number, required: true },
     store_check_name: String,
+    price: Number
 });
 // 构筑模型
 const ShoppingCartModel = mongoose.model('ShoppingCart', shoppingCartSchema);

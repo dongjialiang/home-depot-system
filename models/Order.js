@@ -20,6 +20,7 @@ const orderSchema = new Schema({
     phone: String, // 联系电话
     num: { type: Number, required: true }, // 订单数量
     store_check_name: String, // 商场名字
+    price: Number,
     confirm: {
         type: Boolean,
         default: false,

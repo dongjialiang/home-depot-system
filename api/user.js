@@ -227,11 +227,9 @@ router.post('/resetpassword', async (req, res) => {
                 res.status(422).json({ message: 'Please confirm your email address.' });
             } else if (user.isEmailActivated && user.emailExpires > Date.now()) {
                 res.status(422).json({ message: 'Please verify your email.' });
-            } else if (user.isEmailActivated) {
+            } else {
                 res.json({ message: 'Please verify your email.' });
                 sendVerifyEmail(user, EXPIRES_TIME.FIVEMINUTES, '重置密码', '重置密码的验证码');
-            } else {
-                res.status(422).json({ message: 'Please bind your email.' });
             }
         });
 });

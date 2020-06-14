@@ -112,6 +112,10 @@ POST {{url}}/api/order/70171927/585/add
 GET {{url}}/api/order/all/1/{all}
 {{jsonWebToken}}
 
+### 通过订单id获取订单
+GET {{url}}/api/order/get/{{order_id}}
+{{jsonWebToken}}
+
 ### 根据订单id修改订单内容
 PATCH {{url}}/api/order/{{order_id}}/update
 {{jsonWebToken}}
