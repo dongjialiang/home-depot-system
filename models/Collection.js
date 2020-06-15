@@ -6,12 +6,14 @@ const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 // 编写规则
 const collectionSchema = new Schema({
-    collect_url: {
+    collect_id: {
         type: String,
     },
     collect_desc: {
         type: String,
     },
+    collect_type: String,
+    pic: String,
     user_id: {
         type: String,
         ref: 'User',

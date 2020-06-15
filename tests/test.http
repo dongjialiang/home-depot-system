@@ -129,6 +129,26 @@ PATCH {{url}}/api/order/{{order_id}}/update
 DELETE {{url}}/api/order/{{order_id}}/remove
 {{jsonWebToken}}
 
+### 收藏产品或评价的地址
+POST {{url}}/api/collect/action
+{{jsonWebToken}}
+{{json}}
+
+{
+    "collect_id": "00292329",
+    "collect_desc": "烧烤炉外罩 TOSTERÖ 托斯特洛",
+    "pic": "https://www.ikea.cn/cn/zh/images/products/tosteroe-cover-for-barbecue-black__0709171_PE726849_S5.JPG",
+    "collect_type": "product"
+}
+
+### 获取收藏列表
+Get {{url}}/api/collect/get/all/1
+{{jsonWebToken}}
+
+### 根据id获取收藏信息
+Get {{url}}/api/collect/get/00292329/product
+{{jsonWebToken}}
+
 ### 管理员注册
 # @name admin_token
 POST  {{url}}/api/admin/user/signup

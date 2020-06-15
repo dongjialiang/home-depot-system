@@ -7,10 +7,8 @@
 * make, gcc, g++
 * OpenSSL
 
-## 开发工具
-* NodeJS
-
 ## 运行环境
+* NodeJS
 * docker (不是必要的, 可以选择自己的MongoDB, redis, RabbitMQ)
 * docker-compose (同上, 非必要)
 

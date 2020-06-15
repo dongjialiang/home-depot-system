@@ -89,7 +89,7 @@ ProductRoute.get('/all/:query_params/:schema/:page', async (req, res) => {
             products.map(product => {
                 products_info.push(queryProductInfo(product, schema));
             });
-            const total = await ProductModel.find(filter_query).countDocuments();
+            const total = await products_info.length;
             return res.json({ products_info, total });
         });
 });

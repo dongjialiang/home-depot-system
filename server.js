@@ -37,6 +37,7 @@ const { adminRoute, adminUserRoute, adminProductRoute, adminOrderRoute } = requi
 const { ProductRoute } = require('./api/product');
 const { ShoppingCartRoute } = require('./api/shoppingcart');
 const { OrderRoute } = require('./api/order');
+const { CollectionRoute } = require('./api/collection');
 const profileRoute = require('./api/profile');
 const { uploadAvatar, uploadImages } = require('./api/upload');
 // 配置路由
@@ -49,6 +50,7 @@ app.post('/api/images', upload.array('images', 20), uploadImages);
 app.use('/api/product', ProductRoute);
 app.use('/api/shoppingcart', authenticate, ShoppingCartRoute);
 app.use('/api/order', authenticate, OrderRoute);
+app.use('/api/collect', authenticate, CollectionRoute);
 
 app.use('/api/admin/user', adminRoute);
 app.use('/api/admin/user_control', authenticate, adminUserRoute);
