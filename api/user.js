@@ -154,7 +154,7 @@ router.post('/login', async (req, res, next) => {
                 if (resUsernameAndIP !== null && resUsernameAndIP.consumedPoints > 0) {
                     await limiterConsecutiveFailsByUsernameAndIP.delete(usernameAndIPKey);
                 }
-                return res.json({ 'message': info.message, token });
+                return res.json({ 'message': info.message, user: body, token });
             });
         } catch (error) {
             return next(error);

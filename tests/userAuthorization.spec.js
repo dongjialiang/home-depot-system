@@ -105,22 +105,6 @@ describe('POST /login', () => {
             });
     });
 });
-// 测试发送重置密码的邮件接口
-describe('POST /resetpassword', () => {
-    it('1. should "Please bind your email."', (done) => {
-        request(app)
-            .post('/api/user/resetpassword')
-            .send({
-                email: 'ljd9726@163.com',
-            })
-            .expect(422)
-            .end((err, res) => {
-                if (err) { return done(err); }
-                expect(res.body.message).equal('Please bind your email.');
-                done();
-            });
-    });
-});
 // 测试发送邮箱验证码的邮件接口
 describe('POST /verifyemail', () => {
     it('1. should "Please verify your email."', (done) => {

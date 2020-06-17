@@ -145,6 +145,14 @@ POST {{url}}/api/collect/action
 Get {{url}}/api/collect/get/all/1
 {{jsonWebToken}}
 
+### 查询大分类
+Get {{url}}/api/search/get/all/b_title
+{{jsonWebToken}}
+
+### 查询小分类
+Get {{url}}/api/search/get/all/s_title/休闲和旅游
+{{jsonWebToken}}
+
 ### 根据id获取收藏信息
 Get {{url}}/api/collect/get/00292329/product
 {{jsonWebToken}}

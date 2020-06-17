@@ -39,21 +39,24 @@ const { ShoppingCartRoute } = require('./api/shoppingcart');
 const { OrderRoute } = require('./api/order');
 const { CollectionRoute } = require('./api/collection');
 const { CommentRoute } = require('./api/comment');
+const { SearchRoute } = require('./api/search');
 const profileRoute = require('./api/profile');
-const { uploadAvatar, uploadImage, uploadImages } = require('./api/upload');
+const { uploadAvatar, uploadImage, uploadImages, removeImage } = require('./api/upload');
 // 配置路由
 app.use('/images', express.static(path.join(__dirname, 'uploads'), { maxAge: 31557600000 }));
 app.use('/api/user', userRoute);
 app.use('/api/secure', authenticate, profileRoute);
 app.post('/api/avatar', authenticate, upload.single('avatar'), uploadAvatar);
-app.post('/api/images', authenticate, upload.array('images', 20), uploadImages);
+app.post('/api/images', authenticate, upload.array(20), uploadImages);
 app.post('/api/image', authenticate, upload.single('image'), uploadImage);
+app.delete('/api/delete/image/:image', authenticate, removeImage);
 
 app.use('/api/product', ProductRoute);                         // 产品路由
 app.use('/api/shoppingcart', authenticate, ShoppingCartRoute); // 购物车路由
 app.use('/api/order', authenticate, OrderRoute);               // 订单路由
 app.use('/api/collect', authenticate, CollectionRoute);        // 收藏路由
 app.use('/api/comment', authenticate, CommentRoute);           // 评价路由
+app.use('/api/search', authenticate, SearchRoute);           // 查询路由
 
 app.use('/api/admin/user', adminRoute);
 app.use('/api/admin/user_control', authenticate, adminUserRoute);

@@ -5,9 +5,12 @@
   "main": "server.js",
   "scripts": {
     "test": "cross-env NODE_ENV=production mocha tests/*.spec.js --exit",
-    "dev": "nodemon server --ignore tests/ --delay 2.5",
+    "wrap": "nodemon server --ignore tests/ --delay 2.5",
+    "service": "cross-env NODE_ENV=production node services/app-master",
+    "dev": "run-p wrap service",
     "lint": "eslint \"**/*.js\"",
-    "start": "cross-env NODE_ENV=production node server",
+    "serve": "cross-env NODE_ENV=production node server",
+    "start": "run-p serve service",
     "cluster": "cross-env NODE_ENV=production pm2 start ./app.config.js"
   },
   "keywords": [],
@@ -40,6 +43,7 @@
     "eslint": "^6.8.0",
     "mocha": "^7.2.0",
     "nodemon": "^2.0.4",
+    "npm-run-all": "^4.1.5",
     "supertest": "^4.0.2"
   }
 }

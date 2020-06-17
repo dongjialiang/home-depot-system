@@ -32,7 +32,7 @@ CollectionRoute.post('/action', async (req, res) => {
     }
 });
 /**
- * GET /collect/get/all/:page
+ * GET /get/all/:page
  * 查看收藏列表
  */
 CollectionRoute.get('/get/all/:page', async (req, res) => {
@@ -52,7 +52,7 @@ CollectionRoute.get('/get/all/:page', async (req, res) => {
         });
 });
 /**
- * GET /collect/get/:collect_id/:collect_type
+ * GET /get/:collect_id/:collect_type
  * 查看是否收藏
  */
 CollectionRoute.get('/get/:collect_id/:collect_type', async (req, res) => {
