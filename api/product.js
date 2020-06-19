@@ -56,12 +56,25 @@ ProductRoute.get('/all/:query_params/:schema/:page', async (req, res) => {
         const string_filter_param = ['b_title', 's_title', 'name', 'is_new', 'online_sellable', 'type_name'];
         await query_params.split('&').map(v => {
             const query_param = v.split('=');
+
             if (string_filter_param.includes(query_param[0])) {
                 filter_query[query_param[0]] = query_param[1];
             }
+            // 查询颜色
             if (query_param[0] === 'color') {
-                filter_query['colors.name'] = query_param[1];
+                if (query_param[1].includes(',')) {
+                    const colors_query_param = [];
+                    query_param[1].split(',').map(v => {
+                        colors_query_param.push({
+                            'colors.name': v,
+                        });
+                    });
+                    filter_query['$or'] = colors_query_param;
+                } else {
+                    filter_query['colors.name'] = query_param[1];
+                }
             }
+            // 查询价格
             if (query_param[0] === 'price') {
                 const price_range = query_param[1].split('-');
                 const price_query = {};
@@ -89,8 +102,9 @@ ProductRoute.get('/all/:query_params/:schema/:page', async (req, res) => {
             products.map(product => {
                 products_info.push(queryProductInfo(product, schema));
             });
-            const total = await products_info.length;
-            return res.json({ products_info, total });
+            const total = await ProductModel.find(filter_query).countDocuments();
+            const color = await ProductModel.find(filter_query).distinct('colors.name');
+            return res.json({ products_info, total, color });
         });
 });
 /**

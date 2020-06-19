@@ -98,7 +98,7 @@ CommentRoute.get('/get/all/:user/:page', async (req, res) => {
             if (!comments_info) {
                 return res.status(422).json({ message: 'The comment list is empty.' });
             }
-            const total = await comments_info.length;
+            const total = await CommentModel.find(query_param).countDocuments();
             return res.json({ comments_info, total });
         });
 });

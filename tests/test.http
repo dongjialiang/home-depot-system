@@ -62,7 +62,7 @@ GET {{url}}/api/product/70171927/{pic_array,desc}
 GET {{url}}/api/product/70171927/{all}
 
 ### 获取根据参数查询的符合的产品信息
-GET {{url}}/api/product/all/b_title=家具&s_title=吧台家具&price=100.00-600.00&color=黑色/{price,size,colors}/1
+GET {{url}}/api/product/all/b_title=家具&s_title=吧台家具&price=100.00-600.00&color=黑色,白色/{price,size,colors}/1
 
 ### 根据产品id获取产品库存
 GET {{url}}/api/product/70171927/stores/585
@@ -152,6 +152,9 @@ Get {{url}}/api/search/get/all/b_title
 ### 查询小分类
 Get {{url}}/api/search/get/all/s_title/休闲和旅游
 {{jsonWebToken}}
+
+### 根据搜索关键字获取产品查询列表
+GET {{url}}/api/search/keyword/不能确定使用何种紧固件/1
 
 ### 根据id获取收藏信息
 Get {{url}}/api/collect/get/00292329/product

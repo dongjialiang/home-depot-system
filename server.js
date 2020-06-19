@@ -44,7 +44,10 @@ const profileRoute = require('./api/profile');
 const { uploadAvatar, uploadImage, uploadImages, removeImage } = require('./api/upload');
 // 配置路由
 app.use('/images', express.static(path.join(__dirname, 'uploads'), { maxAge: 31557600000 }));
+
+app.use('/api/search', SearchRoute); // 查询路由
 app.use('/api/user', userRoute);
+
 app.use('/api/secure', authenticate, profileRoute);
 app.post('/api/avatar', authenticate, upload.single('avatar'), uploadAvatar);
 app.post('/api/images', authenticate, upload.array(20), uploadImages);
@@ -56,7 +59,6 @@ app.use('/api/shoppingcart', authenticate, ShoppingCartRoute); // 购物车路�
 app.use('/api/order', authenticate, OrderRoute);               // 订单路由
 app.use('/api/collect', authenticate, CollectionRoute);        // 收藏路由
 app.use('/api/comment', authenticate, CommentRoute);           // 评价路由
-app.use('/api/search', authenticate, SearchRoute);           // 查询路由
 
 app.use('/api/admin/user', adminRoute);
 app.use('/api/admin/user_control', authenticate, adminUserRoute);

@@ -43,11 +43,11 @@ CollectionRoute.get('/get/all/:page', async (req, res) => {
         .find({ user_id })
         .skip((page - 1) * page_size)
         .limit(page_size)
-        .then((collects_info) => {
+        .then(async (collects_info) => {
             if (!collects_info) {
                 return res.status(422).json({ message: 'The collect list is empty.' });
             }
-            const total = collects_info.length;
+            const total = await CollectionModel.find({ user_id }).countDocuments();
             return res.json({ collects_info, total });
         });
 });

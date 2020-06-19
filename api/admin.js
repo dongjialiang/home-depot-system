@@ -210,7 +210,7 @@ adminOrderRoute.get('/all/:page/:schema', async (req, res) => {
             orders.map(order => {
                 orders_info.push(queryProductInfo(order, schema));
             });
-            const total = await orders_info.length;
+            const total = await OrderModel.find().countDocuments();
             return res.json({ orders_info, total });
         });
 });
@@ -265,7 +265,7 @@ adminUserRoute.get('/all/:page', async (req, res) => {
                     banned: user.banned,
                 });
             });
-            const total = await users_info.length;
+            const total = await UserModel.find().countDocuments();
             return res.json({ users_info, total });
         });
 });

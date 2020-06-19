@@ -134,7 +134,7 @@ OrderRoute.get('/all/:page/:schema', async (req, res) => {
             orders.map(order => {
                 orders_info.push(queryProductInfo(order, schema));
             });
-            const total = await orders_info.length;
+            const total = await OrderModel.find({ user_id }).countDocuments();
             return res.json({ orders_info, total });
         });
 });

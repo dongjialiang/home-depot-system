@@ -119,7 +119,7 @@ ShoppingCartRoute.get('/all/:page/:schema', async (req, res) => {
             shoppingcarts.map(shoppingcart => {
                 shoppingcarts_info.push(queryProductInfo(shoppingcart, schema));
             });
-            const total = await shoppingcarts_info.length;
+            const total = await ShoppingCartModel.find({ user_id }).countDocuments();
             return res.json({ shoppingcarts_info, total });
         });
 });
