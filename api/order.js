@@ -7,6 +7,7 @@ const { redisClient } = require('../config/conn');
 const OrderModel = require('../models/Order');
 const { getProductionStockCheckNum, queryProductInfo } = require('../config/product-info');
 const store_check = require('../config/store_check');
+const HttpStatus = require('http-status-codes');
 // 创建路由
 const OrderRoute = express.Router();
 /**
@@ -37,10 +38,10 @@ OrderRoute.post('/:product_id/:store_check_num/add', async (req, res) => {
         let prouduct_available_stock = await JSON.parse(data);
         prouduct_available_stock = prouduct_available_stock || await getProductionStockCheckNum(product_id, store_check_num, product_id_store_check_num);
         if (prouduct_available_stock.available_stock <= 0) {
-            return res.status(422).json({message: 'The order is not available stock.'});
+            return res.status(HttpStatus.UNPROCESSABLE_ENTITY).json({message: 'The order is not available stock.'});
         }
         if (prouduct_available_stock.available_stock <= num) {
-            return res.status(422).json({message: 'The order is not enough.'});
+            return res.status(HttpStatus.UNPROCESSABLE_ENTITY).json({message: 'The order is not enough.'});
         }
         order.save((err, data) => {
             if (err) {
@@ -62,7 +63,7 @@ OrderRoute.delete('/:order_id/remove', async (req, res) => {
             console.error(err);
         }
         if (!data) {
-            return res.status(422).json({ message: 'The order is delete failed.' });
+            return res.status(HttpStatus.UNPROCESSABLE_ENTITY).json({ message: 'The order is delete failed.' });
         }
         res.json({ message: 'The order is delete successful.' });
     });
@@ -88,7 +89,7 @@ OrderRoute.patch('/:order_id/update', async (req, res) => {
             console.error(err);
         }
         if (!data) {
-            return res.status(422).json({ message: 'The order is update failed.' });
+            return res.status(HttpStatus.UNPROCESSABLE_ENTITY).json({ message: 'The order is update failed.' });
         }
         res.json({ message: 'The order is update successful.' });
     });
@@ -106,7 +107,7 @@ OrderRoute.get('/get/:order_id', async (req, res) => {
             console.error(err);
         }
         if (!data) {
-            return res.status(422).json({ message: 'The order is not exist.' });
+            return res.status(HttpStatus.UNPROCESSABLE_ENTITY).json({ message: 'The order is not exist.' });
         }
         res.json({ order_info: data });
     });
@@ -128,7 +129,7 @@ OrderRoute.get('/all/:page/:schema', async (req, res) => {
         .limit(page_size)
         .then(async (orders) => {
             if (!orders) {
-                return res.status(422).json({ message: 'The orders is empty.' });
+                return res.status(HttpStatus.UNPROCESSABLE_ENTITY).json({ message: 'The orders is empty.' });
             }
             const orders_info = [];
             orders.map(order => {

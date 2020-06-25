@@ -4,6 +4,7 @@
 // 引入依赖
 const express = require('express');
 const CommentModel = require('../models/Comment');
+const HttpStatus = require('http-status-codes');
 // 创建路由
 const CommentRoute = express.Router();
 /**
@@ -31,7 +32,7 @@ CommentRoute.delete('/:comment_id/remove', async (req, res) => {
             console.error(err);
         }
         if (!data) {
-            return res.status(422).json({ message: 'The comment is delete failed.' });
+            return res.status(HttpStatus.UNPROCESSABLE_ENTITY).json({ message: 'The comment is delete failed.' });
         }
         res.json({ message: 'The comment is delete successful.' });
     });
@@ -55,7 +56,7 @@ CommentRoute.post('/:comment_id/update', async (req, res) => {
             console.error(err);
         }
         if (!data) {
-            return res.status(422).json({ message: 'The comment is update failed.' });
+            return res.status(HttpStatus.UNPROCESSABLE_ENTITY).json({ message: 'The comment is update failed.' });
         }
         res.json({ message: 'The comment is update successful.' });
     });
@@ -73,7 +74,7 @@ CommentRoute.get('/get/:comment_id', async (req, res) => {
             console.error(err);
         }
         if (!comment_info) {
-            return res.status(422).json({ message: 'The comment is not exist.' });
+            return res.status(HttpStatus.UNPROCESSABLE_ENTITY).json({ message: 'The comment is not exist.' });
         }
         res.json({ comment_info });
     });
@@ -96,7 +97,7 @@ CommentRoute.get('/get/all/:user/:page', async (req, res) => {
         .limit(page_size)
         .then(async (comments_info) => {
             if (!comments_info) {
-                return res.status(422).json({ message: 'The comment list is empty.' });
+                return res.status(HttpStatus.UNPROCESSABLE_ENTITY).json({ message: 'The comment list is empty.' });
             }
             const total = await CommentModel.find(query_param).countDocuments();
             return res.json({ comments_info, total });

@@ -7,6 +7,7 @@ const { redisClient } = require('../config/conn');
 const ShoppingCartModel = require('../models/ShoppingCart');
 const { getProductionStockCheckNum, queryProductInfo } = require('../config/product-info');
 const store_check = require('../config/store_check');
+const HttpStatus = require('http-status-codes');
 // 创建路由
 const ShoppingCartRoute = express.Router();
 /**
@@ -42,10 +43,10 @@ ShoppingCartRoute.post('/:product_id/:store_check_num/add', async (req, res) => 
         let prouduct_available_stock = await JSON.parse(data);
         prouduct_available_stock = prouduct_available_stock || await getProductionStockCheckNum(product_id, store_check_num, product_id_store_check_num);
         if (prouduct_available_stock.available_stock <= 0) {
-            return res.status(422).json({message: 'The product is not available stock.'});
+            return res.status(HttpStatus.UNPROCESSABLE_ENTITY).json({message: 'The product is not available stock.'});
         }
         if (prouduct_available_stock.available_stock <= num) {
-            return res.status(422).json({message: 'The product is not enough.'});
+            return res.status(HttpStatus.UNPROCESSABLE_ENTITY).json({message: 'The product is not enough.'});
         }
         shopping_cart.save((err, data) => {
             if (err) {
@@ -67,7 +68,7 @@ ShoppingCartRoute.delete('/:shoppingcart_id/remove', async (req, res) => {
             console.error(err);
         }
         if (!data) {
-            return res.status(422).json({ message: 'The product is delete failed.' });
+            return res.status(HttpStatus.UNPROCESSABLE_ENTITY).json({ message: 'The product is delete failed.' });
         }
         res.json({ message: 'The product is delete successful.' });
     });
@@ -91,7 +92,7 @@ ShoppingCartRoute.patch('/:shoppingcart_id/update', async (req, res) => {
             console.error(err);
         }
         if (!data) {
-            return res.status(422).json({ message: 'The product is update failed.' });
+            return res.status(HttpStatus.UNPROCESSABLE_ENTITY).json({ message: 'The product is update failed.' });
         }
         res.json({ message: 'The product is update successful.' });
     });
@@ -113,7 +114,7 @@ ShoppingCartRoute.get('/all/:page/:schema', async (req, res) => {
         .limit(page_size)
         .then(async (shoppingcarts) => {
             if (!shoppingcarts) {
-                return res.status(422).json({ message: 'The shoppingcart is empty.' });
+                return res.status(HttpStatus.UNPROCESSABLE_ENTITY).json({ message: 'The shoppingcart is empty.' });
             }
             const shoppingcarts_info = [];
             shoppingcarts.map(shoppingcart => {

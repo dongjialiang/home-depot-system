@@ -6,6 +6,7 @@ const express = require('express');
 const ProductModel = require('../models/Product');
 const { redisClient } = require('../config/conn');
 const { getProductionStockCheckNum, queryProductInfo } = require('../config/product-info');
+const HttpStatus = require('http-status-codes');
 // 创建路由
 const ProductRoute = express.Router();
 /**
@@ -29,7 +30,7 @@ ProductRoute.get('/:product_id/:schema', async (req, res) => {
                 .findOne({ 'product_id': product_id })
                 .then(product => {
                     if (!product) {
-                        return res.status(422).json({
+                        return res.status(HttpStatus.UNPROCESSABLE_ENTITY).json({
                             message: 'The product is not find.',
                         });
                     }
@@ -94,7 +95,7 @@ ProductRoute.get('/all/:query_params/:schema/:page', async (req, res) => {
         .limit(page_size)
         .then(async products => {
             if (!products) {
-                return res.status(422).json({
+                return res.status(HttpStatus.UNPROCESSABLE_ENTITY).json({
                     message: 'The products is empty.',
                 });
             }

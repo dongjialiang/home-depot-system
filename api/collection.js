@@ -4,6 +4,7 @@
 // 引入依赖
 const express = require('express');
 const CollectionModel = require('../models/Collection');
+const HttpStatus = require('http-status-codes');
 // 创建路由
 const CollectionRoute = express.Router();
 /**
@@ -28,7 +29,7 @@ CollectionRoute.post('/action', async (req, res) => {
             return res.json({ message: '收藏成功' });
         }
     } catch (error) {
-        res.status(422).json({ message: '操作失败', error });
+        res.status(HttpStatus.UNPROCESSABLE_ENTITY).json({ message: '操作失败', error });
     }
 });
 /**
@@ -45,7 +46,7 @@ CollectionRoute.get('/get/all/:page', async (req, res) => {
         .limit(page_size)
         .then(async (collects_info) => {
             if (!collects_info) {
-                return res.status(422).json({ message: 'The collect list is empty.' });
+                return res.status(HttpStatus.UNPROCESSABLE_ENTITY).json({ message: 'The collect list is empty.' });
             }
             const total = await CollectionModel.find({ user_id }).countDocuments();
             return res.json({ collects_info, total });

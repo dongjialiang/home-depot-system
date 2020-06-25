@@ -2,7 +2,8 @@
  * 上传图片的文件
  */
 // 引入依赖
-const fs = require('fs');
+// const fs = require('fs');
+const fs = require('fs-extra');
 // 上传用户头像
 const uploadAvatar = (req, res) => {
     let file = req.file;

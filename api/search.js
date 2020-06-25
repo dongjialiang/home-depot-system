@@ -4,6 +4,7 @@
 // 引入依赖
 const express = require('express');
 const ProductModel = require('../models/Product');
+const HttpStatus = require('http-status-codes');
 // 创建路由
 const SearchRoute = express.Router();
 /**
@@ -15,7 +16,7 @@ SearchRoute.get('/get/all/b_title', async (req, res) => {
         .distinct('b_title')
         .then(async (b_title_info) => {
             if (!b_title_info) {
-                return res.status(422).json({ message: 'The b_title list is empty.' });
+                return res.status(HttpStatus.UNPROCESSABLE_ENTITY).json({ message: 'The b_title list is empty.' });
             }
             const total = await b_title_info.length;
             return res.json({ b_title_info, total });
@@ -32,7 +33,7 @@ SearchRoute.get('/get/all/s_title/:b_title', async (req, res) => {
         .distinct('s_title')
         .then(async (s_title_info) => {
             if (!s_title_info) {
-                return res.status(422).json({ message: 'The s_title list is empty.' });
+                return res.status(HttpStatus.UNPROCESSABLE_ENTITY).json({ message: 'The s_title list is empty.' });
             }
             const total = await s_title_info.length;
             return res.json({ s_title_info, total });
@@ -67,7 +68,7 @@ SearchRoute.get('/keyword/:keyword/:page', async (req, res) => {
         .limit(page_size)
         .then(async (search_data) => {
             if (!search_data) {
-                return res.status(422).json({ message: 'The search data is empty.' });
+                return res.status(HttpStatus.UNPROCESSABLE_ENTITY).json({ message: 'The search data is empty.' });
             }
             const total = await ProductModel.find(query_param).countDocuments();
             return res.json({ search_data, total });

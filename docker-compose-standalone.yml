@@ -28,5 +28,6 @@ services:
             - 6379:6379
         hostname: redis
         restart: always
+        privileged: true
         volumes:
             - /data/redis:/data/redis

@@ -7,6 +7,7 @@ const { isEmail, isLength } = require('validator');
 const UserModel = require('../models/User');
 const AdminUserModel = require('../models/AdminUser');
 const jwt = require('jsonwebtoken');
+const HttpStatus = require('http-status-codes');
 // 引入配置
 require('dotenv').config('../config/.env');
 
@@ -90,12 +91,12 @@ const authenticate = async (req, res, next) => {
         const raw = String(req.headers.authorization).split(' ').pop();
         const { user } = await jwt.verify(raw, process.env.TOP_SECRET);
         if (user.banned) {
-            return res.status(422).json({message: 'The user is banned.'});
+            return res.status(HttpStatus.UNAUTHORIZED).json({message: 'The user is banned.'});
         }
         req.user = user;
         next();
     } catch (err) {
-        return res.status(422).json({message: 'invalid signature.'});
+        return res.status(HttpStatus.UNPROCESSABLE_ENTITY).json({message: 'invalid signature.'});
     }
 };
 

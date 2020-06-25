@@ -11,6 +11,7 @@ const OrderModel = require('../models/Order');
 const UserModel = require('../models/User');
 const { queryProductInfo } = require('../config/product-info');
 const { redisClient } = require('../config/conn');
+const HttpStatus = require('http-status-codes');
 
 const maxWrongAttemptsByIPperDay = 50;       // 允许IP每天运行尝试的最大错误数
 const maxConsecutiveFailsByUsernameAndIP = 5; // 允许用户名和IP最大连续失败次数
@@ -48,7 +49,7 @@ adminRoute.post('/signup',
     passport.authenticate('addadmin', { session: false }),
     async (req, res, next) => {
         if (req.user.message) {
-            return res.status(422).json({ 'message': req.user.message });
+            return res.status(HttpStatus.UNPROCESSABLE_ENTITY).json({ 'message': req.user.message });
         }
         req.login(req.user, { session: false }, async (error) => {
             if (error) { return next(error); }
@@ -66,7 +67,7 @@ adminRoute.post('/signup',
  */
 adminRoute.post('/login', async (req, res, next) => {
     if (!isLength(req.body.password, { min: 8 })) {
-        return res.status(422).json({ message: 'Password must be at least 8 characters long.' });
+        return res.status(HttpStatus.UNPROCESSABLE_ENTITY).json({ message: 'Password must be at least 8 characters long.' });
     }
 
     const ipAddr = `admin${req.ip}`;
@@ -87,7 +88,7 @@ adminRoute.post('/login', async (req, res, next) => {
 
     if (retrySecs > 0) {
         res.set('Retry-After', String(retrySecs));
-        return res.status(429).json({ message: 'Too Many Requests.' });
+        return res.status(HttpStatus.TOO_MANY_REQUESTS).json({ message: 'Too Many Requests.' });
     }
     passport.authenticate('adminlogin', async (err, user, info) => {
         try {
@@ -100,13 +101,13 @@ adminRoute.post('/login', async (req, res, next) => {
                         promises.push(limiterConsecutiveFailsByUsernameAndIP.consume(usernameAndIPKey));
                     }
                     await Promise.all(promises);
-                    return res.status(422).json({ message: 'Invalid username or password.' });
+                    return res.status(HttpStatus.UNPROCESSABLE_ENTITY).json({ message: 'Invalid username or password.' });
                 } catch (rlRejected) {
                     if (rlRejected instanceof Error) {
                         throw rlRejected;
                     } else {
                         res.set('Retry-After', String(Math.round(rlRejected.msBeforeNext / 1000)) || 1);
-                        return res.status(429).json({ message: 'Too Many Requests.' });
+                        return res.status(HttpStatus.TOO_MANY_REQUESTS).json({ message: 'Too Many Requests.' });
                     }
                 }
             }
@@ -132,14 +133,14 @@ adminRoute.post('/login', async (req, res, next) => {
  */
 adminProductRoute.post('/add', async (req, res) => {
     if (!req.user.manager) {
-        return res.status(422).json({ message: 'The account is not manager.' });
+        return res.status(HttpStatus.UNAUTHORIZED).json({ message: 'The account is not manager.' });
     }
     ProductModel.create(req.body, (err, data) => {
         if (err) {
             console.error(err);
         }
         if (!data) {
-            return res.status(422).json({ message: 'The product is add failed.' });
+            return res.status(HttpStatus.UNPROCESSABLE_ENTITY).json({ message: 'The product is add failed.' });
         }
         res.json({ message: 'The product is add successful.' });
     });
@@ -152,7 +153,7 @@ adminProductRoute.post('/add', async (req, res) => {
  */
 adminProductRoute.patch('/:product_id/update', async (req, res) => {
     if (!req.user.manager) {
-        return res.status(422).json({ message: 'The account is not manager.' });
+        return res.status(HttpStatus.UNAUTHORIZED).json({ message: 'The account is not manager.' });
     }
     const product_id = await req.params.product_id;
     ProductModel.findOneAndUpdate({ product_id }, req.body, (err, data) => {
@@ -160,7 +161,7 @@ adminProductRoute.patch('/:product_id/update', async (req, res) => {
             console.error(err);
         }
         if (!data) {
-            return res.status(422).json({ message: 'The product is update failed.' });
+            return res.status(HttpStatus.UNPROCESSABLE_ENTITY).json({ message: 'The product is update failed.' });
         }
         res.json({ message: 'The product is update successful.' });
     });
@@ -172,7 +173,7 @@ adminProductRoute.patch('/:product_id/update', async (req, res) => {
  */
 adminProductRoute.delete('/:product_id/delete', async (req, res) => {
     if (!req.user.manager) {
-        return res.status(422).json({ message: 'The account is not manager.' });
+        return res.status(HttpStatus.UNAUTHORIZED).json({ message: 'The account is not manager.' });
     }
     const product_id = await req.params.product_id;
     ProductModel.findOneAndDelete({ product_id }, (err, data) => {
@@ -180,7 +181,7 @@ adminProductRoute.delete('/:product_id/delete', async (req, res) => {
             console.error(err);
         }
         if (!data) {
-            return res.status(422).json({ message: 'The product is delete failed.' });
+            return res.status(HttpStatus.UNPROCESSABLE_ENTITY).json({ message: 'The product is delete failed.' });
         }
         res.json({ message: 'The product is delete successful.' });
     });
@@ -193,7 +194,7 @@ adminProductRoute.delete('/:product_id/delete', async (req, res) => {
  */
 adminOrderRoute.get('/all/:page/:schema', async (req, res) => {
     if (!req.user.manager) {
-        return res.status(422).json({ message: 'The account is not manager.' });
+        return res.status(HttpStatus.UNAUTHORIZED).json({ message: 'The account is not manager.' });
     }
     const page = req.params.page;
     const schema = req.params.schema.replace(/[{}]/g, '');
@@ -204,7 +205,7 @@ adminOrderRoute.get('/all/:page/:schema', async (req, res) => {
         .limit(page_size)
         .then(async (orders) => {
             if (!orders) {
-                return res.status(422).json({ message: 'The orders is empty.' });
+                return res.status(HttpStatus.UNPROCESSABLE_ENTITY).json({ message: 'The orders is empty.' });
             }
             const orders_info = [];
             orders.map(order => {
@@ -222,7 +223,7 @@ adminOrderRoute.get('/all/:page/:schema', async (req, res) => {
  */
 adminOrderRoute.patch('/:order_id/:confirm', async (req, res) => {
     if (!req.user.manager) {
-        return res.status(422).json({ message: 'The account is not manager.' });
+        return res.status(HttpStatus.UNAUTHORIZED).json({ message: 'The account is not manager.' });
     }
     const order_id = req.params.order_id;
     const confirm = req.params.confirm;
@@ -232,7 +233,7 @@ adminOrderRoute.patch('/:order_id/:confirm', async (req, res) => {
                 console.error(err);
             }
             if (!data) {
-                return res.status(422).json({ message: 'The order is confirm status change failed.' });
+                return res.status(HttpStatus.UNPROCESSABLE_ENTITY).json({ message: 'The order is confirm status change failed.' });
             }
             res.json({ message: 'The order is confirm status change successful.' });
         });
@@ -244,7 +245,7 @@ adminOrderRoute.patch('/:order_id/:confirm', async (req, res) => {
  */
 adminUserRoute.get('/all/:page', async (req, res) => {
     if (!req.user.manager) {
-        return res.status(422).json({ message: 'The account is not manager.' });
+        return res.status(HttpStatus.UNAUTHORIZED).json({ message: 'The account is not manager.' });
     }
     const page = req.params.page;
     const page_size = 20;
@@ -254,7 +255,7 @@ adminUserRoute.get('/all/:page', async (req, res) => {
         .limit(page_size)
         .then(async (users) => {
             if (!users) {
-                return res.status(422).json({ message: 'The users is empty.' });
+                return res.status(HttpStatus.UNPROCESSABLE_ENTITY).json({ message: 'The users is empty.' });
             }
             const users_info = [];
             users.map(user => {
@@ -277,7 +278,7 @@ adminUserRoute.get('/all/:page', async (req, res) => {
  */
 adminUserRoute.patch('/:email/:banned', async (req, res) => {
     if (!req.user.manager) {
-        return res.status(422).json({ message: 'The account is not manager.' });
+        return res.status(HttpStatus.UNAUTHORIZED).json({ message: 'The account is not manager.' });
     }
     const email = req.params.email;
     const banned = req.params.banned;
@@ -287,7 +288,7 @@ adminUserRoute.patch('/:email/:banned', async (req, res) => {
                 console.error(err);
             }
             if (!data) {
-                return res.status(422).json({ message: 'The user is banned status change failed.' });
+                return res.status(HttpStatus.UNPROCESSABLE_ENTITY).json({ message: 'The user is banned status change failed.' });
             }
             res.json({ message: 'The user is banned status change successful.' });
         });
