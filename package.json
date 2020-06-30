@@ -6,12 +6,13 @@
   "scripts": {
     "test": "cross-env NODE_ENV=production mocha tests/*.spec.js --exit",
     "wrap": "nodemon server --ignore tests/ --delay 2.5",
-    "service": "cross-env NODE_ENV=production node services/app-master",
-    "dev": "run-p wrap service",
+    "email-service": "cross-env NODE_ENV=production node services/app-master",
+    "dev": "run-p wrap email-service",
     "lint": "eslint \"**/*.js\"",
     "serve": "cross-env NODE_ENV=production node server",
-    "start": "run-p serve service",
-    "cluster": "cross-env NODE_ENV=production pm2 start ./app.config.js"
+    "prod": "run-p serve email-service",
+    "cluster": "cross-env NODE_ENV=production pm2 start ./app.config.js",
+    "start": "npm run cluster"
   },
   "keywords": [],
   "author": "",

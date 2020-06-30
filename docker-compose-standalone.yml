@@ -27,6 +27,7 @@ services:
         ports:
             - 6379:6379
         hostname: redis
+        command: --appendonly yes
         restart: always
         privileged: true
         volumes:

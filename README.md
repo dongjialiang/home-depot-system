@@ -42,7 +42,7 @@
 ### 启动邮件服务(处理需要发送的邮件)
 
 ```
-    npm run service
+    npm run email-service
 ```
 
 ### 生产模式
@@ -56,7 +56,7 @@
 并行启动后台接口服务和邮件服务
 
 ```
-    npm run start
+    npm run prod
 ```
 
 ### 开发模式
@@ -79,6 +79,12 @@
 
 ```
     npm run cluster
+```
+
+默认启动命令被用作该命令的别名
+
+```
+    npm run start
 ```
 
 ## 找到一些可能出现问题和语法错误
