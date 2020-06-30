@@ -81,7 +81,7 @@
     npm run cluster
 ```
 
-默认启动命令被用作该命令的别名
+默认启动命令也使用pm2运行集群服务
 
 ```
     npm run start

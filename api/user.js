@@ -24,7 +24,7 @@ const EXPIRES_TIME = { // 过期时间
 const maxWrongAttemptsByIPperDay = 50;       // 允许IP每天运行尝试的最大错误数
 const maxConsecutiveFailsByUsernameAndIP = 5; // 允许用户名和IP最大连续失败次数
 
-//
+// 每个IP每天允许最大访问失败次数的限制器
 const limiterSlowBruteByIP = new RateLimiterRedis({
     storeClient: redisClient,
     keyPrefix: 'login_fail_ip_per_day',
@@ -32,7 +32,7 @@ const limiterSlowBruteByIP = new RateLimiterRedis({
     duration: 60 * 60 * 24,
     blockDuration: 60 * 60 * 24,
 });
-// 
+// 每个用户和IP(不同设备可能不同IP)允许最大连续访问失败次数的限制器
 const limiterConsecutiveFailsByUsernameAndIP = new RateLimiterRedis({
     storeClient: redisClient,
     keyPrefix: 'login_fail_consecutive_username_and_ip',

@@ -12,7 +12,7 @@
     "serve": "cross-env NODE_ENV=production node server",
     "prod": "run-p serve email-service",
     "cluster": "cross-env NODE_ENV=production pm2 start ./app.config.js",
-    "start": "npm run cluster"
+    "start": "pm2-runtime start ./app.config.js"
   },
   "keywords": [],
   "author": "",
