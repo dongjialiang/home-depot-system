@@ -1,5 +1,4 @@
-# @url = http://localhost:7326
-@url = http://106.53.103.186
+@url = http://localhost:7326
 
 @json = Content-Type: application/json
 @jsonWebToken = Authorization: Bearer {{user_token.response.body.token}}

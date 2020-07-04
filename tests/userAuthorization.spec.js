@@ -9,8 +9,6 @@ const app = require('../server'); // 直接使用服务器测试
 const { before, describe, it } = require('mocha');
 
 const UserModel = require('../models/User');
-// 引入配置
-require('dotenv').config({ path: `${process.cwd()}/config/.env` });
 
 let jwtToken;
 let resetPasswordToken;

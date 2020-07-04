@@ -3,24 +3,8 @@
  */
 // 引入依赖
 const { expect } = require('chai');
-const { after, before, describe, it } = require('mocha');
-const mongoose = require('mongoose');
-const { mongoDBTestConnUrl } = require('../config/conn');
+const { after, describe, it } = require('mocha');
 const UserModel = require('../models/User');
-// 引入配置
-require('dotenv').config({ path: `${process.cwd()}/config/.env` });
-
-before((done) => {
-    mongoose.set('useCreateIndex', true);
-    mongoose.connect(mongoDBTestConnUrl, {
-        useNewUrlParser: true,    // 启用新的字符串连接解释器
-        useUnifiedTopology: true, // 启用新的拓扑引擎,删除几个旧的连接选项
-    })
-    .then(() => { /* console.log('MongoDB connection successful...'); */ });
-    mongoose.connection.on('error', error => console.error(error));
-    mongoose.Promise = global.Promise;
-    done();
-});
 
 describe('User Model', () => {
     const userData = {
