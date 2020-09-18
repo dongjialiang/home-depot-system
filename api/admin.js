@@ -223,7 +223,8 @@ adminOrderRoute.get('/all/:page/:schema', async (req, res) => {
  */
 adminOrderRoute.patch('/:order_id/:confirm', async (req, res) => {
     if (!req.user.manager) {
-        return res.status(HttpStatus.UNAUTHORIZED).json({ message: 'The account is not manager.' });
+        return res.status(HttpStatus.UNAUTHORIZED)
+            .json({ message: 'The account is not manager.' });
     }
     const order_id = req.params.order_id;
     const confirm = req.params.confirm;
@@ -233,7 +234,8 @@ adminOrderRoute.patch('/:order_id/:confirm', async (req, res) => {
                 console.error(err);
             }
             if (!data) {
-                return res.status(HttpStatus.UNPROCESSABLE_ENTITY).json({ message: 'The order is confirm status change failed.' });
+                return res.status(HttpStatus.UNPROCESSABLE_ENTITY)
+                    .json({ message: 'The order is confirm status change failed.' });
             }
             res.json({ message: 'The order is confirm status change successful.' });
         });

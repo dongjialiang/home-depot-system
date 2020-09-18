@@ -17,11 +17,11 @@ const HttpStatus = require('http-status-codes');
 require('dotenv').config('../config/.env');
 
 const EXPIRES_TIME = { // 过期时间
-    ONEDAY: Date.now() + 24 * 3600 * 1000, // 一天
-    FIVEMINUTES: Date.now() + 300 * 1000,  // 五分钟
+    ONEDAY: () => Date.now() + 24 * 3600 * 1000, // 一天
+    FIVEMINUTES: () => Date.now() + 300 * 1000,  // 五分钟
 }
 
-const maxWrongAttemptsByIPperDay = 50;       // 允许IP每天运行尝试的最大错误数
+const maxWrongAttemptsByIPperDay = 50;        // 允许IP每天运行尝试的最大错误数
 const maxConsecutiveFailsByUsernameAndIP = 5; // 允许用户名和IP最大连续失败次数
 
 // 每个IP每天允许最大访问失败次数的限制器
@@ -93,7 +93,7 @@ router.post('/signup',
             const token = jwt.sign({ user: body }, process.env.TOP_SECRET, { expiresIn: '14d' });
             res.json({ 'message': 'Signup successful.', user: body, token });
         });
-        sendVerifyEmail(req.user, EXPIRES_TIME.ONEDAY, '绑定邮箱', '绑定邮箱的验证码');
+        sendVerifyEmail(req.user, EXPIRES_TIME.ONEDAY(), '绑定邮箱', '绑定邮箱的验证码');
     }
 );
 /**
@@ -104,7 +104,8 @@ router.post('/signup',
  */
 router.post('/login', async (req, res, next) => {
     if (!isLength(req.body.password, { min: 8 })) {
-        return res.status(HttpStatus.UNPROCESSABLE_ENTITY).json({ message: 'Password must be at least 8 characters long.' });
+        return res.status(HttpStatus.UNPROCESSABLE_ENTITY)
+            .json({ message: 'Password must be at least 8 characters long.' });
     }
 
     const ipAddr = req.ip;
@@ -117,15 +118,18 @@ router.post('/login', async (req, res, next) => {
 
     let retrySecs = 0; // 重试需要秒数
 
-    if (resSlowByIP !== null && resSlowByIP.consumedPoints > maxWrongAttemptsByIPperDay) {
+    if (resSlowByIP !== null
+        && resSlowByIP.consumedPoints > maxWrongAttemptsByIPperDay) {
         retrySecs = Math.round(resSlowByIP.msBeforeNext / 1000) || 1;
-    } else if (resUsernameAndIP !== null && resUsernameAndIP.consumedPoints > maxConsecutiveFailsByUsernameAndIP) {
+    } else if (resUsernameAndIP !== null
+        && resUsernameAndIP.consumedPoints > maxConsecutiveFailsByUsernameAndIP) {
         retrySecs = Math.round(resUsernameAndIP.msBeforeNext / 1000) || 1;
     }
 
     if (retrySecs > 0) {
         res.set('Retry-After', String(retrySecs));
-        return res.status(HttpStatus.TOO_MANY_REQUESTS).json({ message: 'Too Many Requests.' });
+        return res.status(HttpStatus.TOO_MANY_REQUESTS)
+            .json({ message: 'Too Many Requests.' });
     }
     passport.authenticate('login', async (err, user, info) => {
         try {
@@ -135,25 +139,37 @@ router.post('/login', async (req, res, next) => {
                 try {
                     const promises = [limiterSlowBruteByIP.consume(ipAddr)];
                     if (info.message === 'Invalid password.') {
-                        promises.push(limiterConsecutiveFailsByUsernameAndIP.consume(usernameAndIPKey));
+                        promises.push(limiterConsecutiveFailsByUsernameAndIP
+                            .consume(usernameAndIPKey));
                     }
                     await Promise.all(promises);
-                    return res.status(HttpStatus.UNPROCESSABLE_ENTITY).json({ message: 'Invalid email or password.' });
+                    return res.status(HttpStatus.UNPROCESSABLE_ENTITY)
+                        .json({ message: 'Invalid email or password.' });
                 } catch (rlRejected) {
                     if (rlRejected instanceof Error) {
                         throw rlRejected;
                     } else {
-                        res.set('Retry-After', String(Math.round(rlRejected.msBeforeNext / 1000)) || 1);
-                        return res.status(HttpStatus.TOO_MANY_REQUESTS).json({ message: 'Too Many Requests.' });
+                        res.set('Retry-After',
+                            String(Math.round(rlRejected.msBeforeNext / 1000)) || 1);
+                        return res.status(HttpStatus.TOO_MANY_REQUESTS)
+                            .json({ message: 'Too Many Requests.' });
                     }
                 }
             }
             req.login(user, { session: false }, async (error) => {
                 if (error) { return next(error); }
-                const body = { _id: user._id, email: user.email, banned: user.banned };
-                const token = jwt.sign({ user: body }, process.env.TOP_SECRET, { expiresIn: '14d' });
-                if (resUsernameAndIP !== null && resUsernameAndIP.consumedPoints > 0) {
-                    await limiterConsecutiveFailsByUsernameAndIP.delete(usernameAndIPKey);
+                const body = {
+                    _id: user._id,
+                    email: user.email,
+                    banned: user.banned
+                };
+                const token = jwt.sign({ user: body },
+                    process.env.TOP_SECRET,
+                    { expiresIn: '14d' });
+                if (resUsernameAndIP !== null
+                    && resUsernameAndIP.consumedPoints > 0) {
+                    await limiterConsecutiveFailsByUsernameAndIP
+                        .delete(usernameAndIPKey);
                 }
                 return res.json({ 'message': info.message, user: body, token });
             });
@@ -180,7 +196,7 @@ router.post('/verifyemail', async (req, res) => {
                 res.json({ message: 'Please verify your email.' });
             } else {
                 res.json({ message: 'Please verify your email.' });
-                sendVerifyEmail(user, EXPIRES_TIME.ONEDAY, '绑定邮箱', '绑定邮箱的验证码');
+                sendVerifyEmail(user, EXPIRES_TIME.ONEDAY(), '绑定邮箱', '绑定邮箱的验证码');
             }
         });
 });
@@ -192,10 +208,12 @@ router.post('/verifyemail', async (req, res) => {
  */
 router.post('/verifyemailtoken', async (req, res, next) => {
     if (!isEmail(req.body.email)) {
-        return res.status(HttpStatus.UNPROCESSABLE_ENTITY).json({ message: 'Please confirm your email address.' });
+        return res.status(HttpStatus.UNPROCESSABLE_ENTITY)
+            .json({ message: 'Please confirm your email address.' });
     }
     if (!isLength(req.body.emailToken, { min: 8 })) {
-        return res.status(HttpStatus.UNPROCESSABLE_ENTITY).json({ message: 'The email token must be at least 8 characters long.' });
+        return res.status(HttpStatus.UNPROCESSABLE_ENTITY)
+            .json({ message: 'The email token must be at least 8 characters long.' });
     }
     const email = req.body.email;
     UserModel
@@ -204,9 +222,11 @@ router.post('/verifyemailtoken', async (req, res, next) => {
         .exec((err, user) => {
             if (err) { return next(err); }
             if (!user || (user.emailToken != req.body.emailToken)) {
-                return res.status(HttpStatus.UNPROCESSABLE_ENTITY).json({ message: 'Verify email token is invalid or has expired.' });
+                return res.status(HttpStatus.UNPROCESSABLE_ENTITY)
+                    .json({ message: 'Verify email token is invalid or has expired.' });
             } else if (user.isEmailActivated) {
-                res.status(HttpStatus.UNPROCESSABLE_ENTITY).json({ message: 'The email is activated.' });
+                res.status(HttpStatus.UNPROCESSABLE_ENTITY)
+                    .json({ message: 'The email is activated.' });
             } else {
                 resetEmailToken(user);
                 user.save();
@@ -230,7 +250,7 @@ router.post('/resetpassword', async (req, res) => {
                 res.status(HttpStatus.UNPROCESSABLE_ENTITY).json({ message: 'Please verify your email.' });
             } else {
                 res.json({ message: 'Please verify your email.' });
-                sendVerifyEmail(user, EXPIRES_TIME.FIVEMINUTES, '重置密码', '重置密码的验证码');
+                sendVerifyEmail(user, EXPIRES_TIME.FIVEMINUTES(), '重置密码', '重置密码的验证码');
             }
         });
 });

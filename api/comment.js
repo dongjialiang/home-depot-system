@@ -6,7 +6,8 @@ const express = require('express');
 const CommentModel = require('../models/Comment');
 const HttpStatus = require('http-status-codes');
 // 创建路由
-const CommentRoute = express.Router();
+const CommentRoute = express.Router(); // 注册用户的评价路由
+const AllCommentRoute = express.Router(); // 所有用户的评价路由
 /**
  * POST /add
  * 创建评价
@@ -68,6 +69,47 @@ CommentRoute.post('/:comment_id/update', async (req, res) => {
  */
 CommentRoute.get('/get/:comment_id', async (req, res) => {
     const comment_id = req.params.comment_id;
+    const user_id = req.user._id;
+    CommentModel.findOne({ _id: comment_id, user_id },
+        (err, comment_info) => {
+        if (err) {
+            console.error(err);
+        }
+        if (!comment_info) {
+            return res.status(HttpStatus.UNPROCESSABLE_ENTITY).json({ message: 'The comment is not exist.' });
+        }
+        res.json({ comment_info });
+    });
+});
+/**
+ * GET /get/all/:user/:page
+ * 查看自己所有的评价
+ * @param page [页码]
+ */
+CommentRoute.get('/get/all/:page', async (req, res) => {
+    const user_id = req.user._id;
+    const page = req.params.page;
+    const page_size = 20;
+    const query_param = { user_id };
+    CommentModel
+        .find(query_param)
+        .skip((page - 1) * page_size)
+        .limit(page_size)
+        .then(async (comments_info) => {
+            if (!comments_info) {
+                return res.status(HttpStatus.UNPROCESSABLE_ENTITY).json({ message: 'The comment list is empty.' });
+            }
+            const total = await CommentModel.find(query_param).countDocuments();
+            return res.json({ comments_info, total });
+        });
+});
+/**
+ * Get /get/:comment_id
+ * 根据评价id获取评价
+ * @param comment_id [评价id]
+ */
+AllCommentRoute.get('/get/:comment_id', async (req, res) => {
+    const comment_id = req.params.comment_id;
     CommentModel.findOne({ _id: comment_id },
         (err, comment_info) => {
         if (err) {
@@ -83,14 +125,11 @@ CommentRoute.get('/get/:comment_id', async (req, res) => {
  * GET /get/all/:user/:page
  * 查看自己所有的评价
  * @param page [页码]
- * @param user [是全体用户还是个人用户]
  */
-CommentRoute.get('/get/all/:user/:page', async (req, res) => {
-    const user_id = req.user._id;
+AllCommentRoute.get('/get/all/:page', async (req, res) => {
     const page = req.params.page;
-    const user = req.params.user;
     const page_size = 20;
-    const query_param = (user === 'user') ? { user_id } : {};
+    const query_param = {};
     CommentModel
         .find(query_param)
         .skip((page - 1) * page_size)
@@ -104,4 +143,4 @@ CommentRoute.get('/get/all/:user/:page', async (req, res) => {
         });
 });
 // 导出路由
-module.exports = { CommentRoute };
+module.exports = { CommentRoute, AllCommentRoute };

@@ -37,21 +37,21 @@ ShoppingCartRoute.post('/:product_id/:store_check_num/add', async (req, res) => 
     };
     const shopping_cart = new ShoppingCartModel(product_of_shopping_cart);
     redisClient.get(product_id_store_check_num, async (err, data) => {
-        if (err) {
-            console.error(err);
-        }
+        if (err) { console.error(err); }
         let prouduct_available_stock = await JSON.parse(data);
-        prouduct_available_stock = prouduct_available_stock || await getProductionStockCheckNum(product_id, store_check_num, product_id_store_check_num);
+        prouduct_available_stock = prouduct_available_stock
+            || await getProductionStockCheckNum(product_id,
+                store_check_num, product_id_store_check_num);
         if (prouduct_available_stock.available_stock <= 0) {
-            return res.status(HttpStatus.UNPROCESSABLE_ENTITY).json({message: 'The product is not available stock.'});
+            return res.status(HttpStatus.UNPROCESSABLE_ENTITY)
+                .json({ message: 'The product is not available stock.' });
         }
         if (prouduct_available_stock.available_stock <= num) {
-            return res.status(HttpStatus.UNPROCESSABLE_ENTITY).json({message: 'The product is not enough.'});
+            return res.status(HttpStatus.UNPROCESSABLE_ENTITY)
+                .json({ message: 'The product is not enough.' });
         }
         shopping_cart.save((err, data) => {
-            if (err) {
-                throw err;
-            }
+            if (err) { throw err; }
             res.json(data);
         });
     });
@@ -68,7 +68,8 @@ ShoppingCartRoute.delete('/:shoppingcart_id/remove', async (req, res) => {
             console.error(err);
         }
         if (!data) {
-            return res.status(HttpStatus.UNPROCESSABLE_ENTITY).json({ message: 'The product is delete failed.' });
+            return res.status(HttpStatus.UNPROCESSABLE_ENTITY)
+                .json({ message: 'The product is delete failed.' });
         }
         res.json({ message: 'The product is delete successful.' });
     });
@@ -92,7 +93,8 @@ ShoppingCartRoute.patch('/:shoppingcart_id/update', async (req, res) => {
             console.error(err);
         }
         if (!data) {
-            return res.status(HttpStatus.UNPROCESSABLE_ENTITY).json({ message: 'The product is update failed.' });
+            return res.status(HttpStatus.UNPROCESSABLE_ENTITY)
+                .json({ message: 'The product is update failed.' });
         }
         res.json({ message: 'The product is update successful.' });
     });
@@ -114,7 +116,8 @@ ShoppingCartRoute.get('/all/:page/:schema', async (req, res) => {
         .limit(page_size)
         .then(async (shoppingcarts) => {
             if (!shoppingcarts) {
-                return res.status(HttpStatus.UNPROCESSABLE_ENTITY).json({ message: 'The shoppingcart is empty.' });
+                return res.status(HttpStatus.UNPROCESSABLE_ENTITY)
+                    .json({ message: 'The shoppingcart is empty.' });
             }
             const shoppingcarts_info = [];
             shoppingcarts.map(shoppingcart => {

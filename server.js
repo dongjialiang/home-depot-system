@@ -41,7 +41,7 @@ const { ProductRoute } = require('./api/product');
 const { ShoppingCartRoute } = require('./api/shoppingcart');
 const { OrderRoute } = require('./api/order');
 const { CollectionRoute } = require('./api/collection');
-const { CommentRoute } = require('./api/comment');
+const { CommentRoute, AllCommentRoute } = require('./api/comment');
 const { SearchRoute } = require('./api/search');
 const profileRoute = require('./api/profile');
 const { uploadAvatar, uploadImage, uploadImages, removeImage } = require('./api/upload');
@@ -62,6 +62,7 @@ app.use('/api/shoppingcart', authenticate, ShoppingCartRoute); // 购物车路�
 app.use('/api/order', authenticate, OrderRoute);               // 订单路由
 app.use('/api/collect', authenticate, CollectionRoute);        // 收藏路由
 app.use('/api/comment', authenticate, CommentRoute);           // 评价路由
+app.use('/api/allcomment', AllCommentRoute);                   // 所有用户都可访问的评价路由
 
 app.use('/api/admin/user', adminRoute);
 app.use('/api/admin/user_control', authenticate, adminUserRoute);
